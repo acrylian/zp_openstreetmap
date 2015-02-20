@@ -376,7 +376,7 @@ class zpOpenStreetMap {
         $result = array(
             'lat' => $lat_f,
             'long' => $long_f,
-            'title' => '<h3>'.js_encode($image->getTitle()).'</h3>',
+            'title' => shortenContent(js_encode($image->getTitle()),50,'...').'<br />',
             'desc' => shortenContent(js_encode($image->getDesc()),100,'...'),
             'thumb' => $thumb
         );
@@ -453,7 +453,7 @@ class zpOpenStreetMap {
         $js_geodata .= ' geodata[' . $count . '] = {
                   lat : "' . $geo['lat'] . '",
                   long : "' . $geo['long'] . '",
-                  title : "' . $geo['title'] . '",
+                  title : "' . shortenContent($geo['title'],50,'...') . '",
                   desc : "' . shortenContent($geo['desc'],100,'...') . '",
                   thumb : "' . $geo['thumb'] . '"
                 };';
