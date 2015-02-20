@@ -26,8 +26,8 @@ class zpOpenStreetMapOptions {
     setOptionDefault('osmap_controlpos', 'topleft');
     setOptionDefault('osmap_maptiles', 'OpenStreetMap_Mapnik');
     setOptionDefault('osmap_clusterradius', 40);
-    setOptionDefault('osmap_markerpopups', 1);
-    setOptionDefault('osmap_markerpopups_thumb', 1);
+    setOptionDefault('osmap_markerpopup', 1);
+    setOptionDefault('osmap_markerpopup_thumb', 1);
     setOptionDefault('osmap_showscale', 1);
   }
 
@@ -311,10 +311,10 @@ class zpOpenStreetMap {
           case 'album.php':
             $this->obj = $_zp_current_album;
             $this->mode = 'cluster';
-            $this->markerpopup_thumb = getOption('osmap_markerpopups_thumb');
+            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
           case 'search.php':
             $this->mode = 'cluster';
-            $this->markerpopup_thumb = getOption('osmap_markerpopups_thumb');
+            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
             break;
         }
       }
@@ -343,6 +343,7 @@ class zpOpenStreetMap {
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.Default.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/zp_openstreetmap.css" />
     <!-- <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.css" /> -->
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.js"></script>
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.markercluster.js"></script>
@@ -375,8 +376,8 @@ class zpOpenStreetMap {
         $result = array(
             'lat' => $lat_f,
             'long' => $long_f,
-            'title' => '<h3>'.js_encode($image->getTitle()).'</h3>',
-            'desc' => js_encode($image->getDesc()),
+            'title' => shortenContent(js_encode($image->getTitle()),50,'...').'<br />',
+            'desc' => shortenContent(js_encode($image->getDesc()),100,'...'),
             'thumb' => $thumb
         );
       }
@@ -452,8 +453,8 @@ class zpOpenStreetMap {
         $js_geodata .= ' geodata[' . $count . '] = {
                   lat : "' . $geo['lat'] . '",
                   long : "' . $geo['long'] . '",
-                  title : "' . $geo['title'] . '",
-                  desc : "' . $geo['desc'] . '",
+                  title : "' . shortenContent($geo['title'],50,'...') . '",
+                  desc : "' . shortenContent($geo['desc'],100,'...') . '",
                   thumb : "' . $geo['thumb'] . '"
                 };';
       }
