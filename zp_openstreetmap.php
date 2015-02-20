@@ -343,6 +343,7 @@ class zpOpenStreetMap {
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.Default.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/zp_openstreetmap.css" />
     <!-- <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.css" /> -->
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.js"></script>
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.markercluster.js"></script>
@@ -376,7 +377,7 @@ class zpOpenStreetMap {
             'lat' => $lat_f,
             'long' => $long_f,
             'title' => '<h3>'.js_encode($image->getTitle()).'</h3>',
-            'desc' => js_encode($image->getDesc()),
+            'desc' => shortenContent(js_encode($image->getDesc()),100,'...'),
             'thumb' => $thumb
         );
       }
@@ -453,7 +454,7 @@ class zpOpenStreetMap {
                   lat : "' . $geo['lat'] . '",
                   long : "' . $geo['long'] . '",
                   title : "' . $geo['title'] . '",
-                  desc : "' . $geo['desc'] . '",
+                  desc : "' . shortenContent($geo['desc'],100,'...') . '",
                   thumb : "' . $geo['thumb'] . '"
                 };';
       }
