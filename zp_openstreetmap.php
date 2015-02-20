@@ -26,8 +26,8 @@ class zpOpenStreetMapOptions {
     setOptionDefault('osmap_controlpos', 'topleft');
     setOptionDefault('osmap_maptiles', 'OpenStreetMap_Mapnik');
     setOptionDefault('osmap_clusterradius', 40);
-    setOptionDefault('osmap_markerpopups', 1);
-    setOptionDefault('osmap_markerpopups_thumb', 1);
+    setOptionDefault('osmap_markerpopup', 1);
+    setOptionDefault('osmap_markerpopup_thumb', 1);
     setOptionDefault('osmap_showscale', 1);
   }
 
@@ -311,10 +311,10 @@ class zpOpenStreetMap {
           case 'album.php':
             $this->obj = $_zp_current_album;
             $this->mode = 'cluster';
-            $this->markerpopup_thumb = getOption('osmap_markerpopups_thumb');
+            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
           case 'search.php':
             $this->mode = 'cluster';
-            $this->markerpopup_thumb = getOption('osmap_markerpopups_thumb');
+            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
             break;
         }
       }
