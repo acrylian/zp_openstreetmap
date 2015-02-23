@@ -18,11 +18,13 @@ Copy the theme files (file and folder) to your `plugins` folder and enable the p
 ###Standard theme usage
 Place the function `printOpenStreetMap()` on your theme's `album.php` and/or `image.php` where you wish the map to appear. If there is no metadata available the map will not be printed.
 
-###Custom maps
-You can also create maps from any image or album using the zpOpenStreetMap class (see the file for more detailed documentation on what properties you can set):
+###Custom maps beyond current image/album
+#### Individual images or albums
+You can also create maps from any image or album using the zpOpenStreetMap class (see the file itself for more detailed documentation on which properties you can set):
 
 ```php
-$object = newImage('<albumname>','<imagefilename>'); 
+$albumobj = newAlbum('<albumname>');
+$object = newImage($albumobj,'<imagefilename>'); 
 $map = new zpOpenStreetMap(NULL,$object);
 $map->printMap();
 ```
@@ -34,6 +36,7 @@ Or you can use the template function:
 printOpenStreetMap(NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, $object);`
 ```
 
+#### Custom maps based on custom geodata
 Custom maps without any image or album involved work the same way. Just passing an array to the custructor. This array must be structured like this:
 
 ```php
@@ -44,12 +47,13 @@ $geodata = array(
 	    'title' => 'some title for the marker popup',
 	    'desc' => 'some description for the marker popup',
 	    'thumb' => 'some html for the marker popup' // e.g. <img>  
+	    'current' => 0 // 1 to hightight this marker with another color. Intended for the current image on album marker view but can be used otherwise, too
 	  )
 );
 $map = new zpOpenStreetMap($geodata);
 $map->printMap();
 
-//You can do the same with the template function
+//You can do the same with the template function although the class way is more flexible.
 printOpenStreetMap($geodata);
 ````
-This would create one marker. If you need more add more arrays to the array.
+This would create one marker. If you need more add more arrays to the array above.
