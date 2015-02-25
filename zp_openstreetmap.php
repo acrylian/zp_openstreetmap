@@ -299,7 +299,7 @@ class zpOpenStreetMap {
    * @param obj Image or album object If set this object is used and $geodatat is ignored if set as well
    */
   function __construct($geodata = NULL, $obj = NULL) {
-    global $_zp_gallery_page, $_zp_current_image, $_zp_current_album;
+    global $_zp_gallery_page, $_zp_current_image, $_zp_current_album, $_zp_current_search;
     $this->center = $this->getCenter();
     $this->fitbounds = $this->getFitBounds();
     $this->width = getOption('osmap_width');
