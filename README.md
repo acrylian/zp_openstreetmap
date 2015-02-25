@@ -8,6 +8,7 @@ Alternatively you can also create custom maps.
 Scripts used
 - http://leafletjs.com 
 - https://github.com/Leaflet/Leaflet.markercluster
+- https://github.com/ardhi/Leaflet.MousePosition
  
 License: GPL v3 or later 
   

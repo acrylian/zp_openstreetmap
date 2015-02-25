@@ -1,16 +1,20 @@
 <?php
 /**
- * Plugin for showing OpenStreetMap maps using LeafletJS (http://leafletjs.com) for images or images from albums with embeded geodata or maps with custom geodata.
- * Also includes the marker cluster plugin https://github.com/Leaflet/Leaflet.markercluster by Dave Leaver.
+ * A Zenphoto plugin for showing OpenStreetMap maps using LeafletJS (http://leafletjs.com) for images or images from albums with embeded geodata or maps with custom geodata.
+ * Also includes 
+ * - marker cluster plugin https://github.com/Leaflet/Leaflet.markercluster by Dave Leaver
+ * - MousePosition plugin https://github.com/ardhi/Leaflet.MousePosition by Ardhi Lukianto
  * 
- * @author Malte Müller (acrylian)
+ * @author Malte Müller (acrylian) <info@maltem.de>
+ * @copyright 2015 Malte Müller
+ * @license GPL v3 or later
  * @package plugins
  * @subpackage media
  */
 $plugin_is_filter = 5 | THEME_PLUGIN;
-$plugin_description = gettext("Plugin for showing OpenStreetMap maps using LeafletJS for images or images from albums with embeded geodata.");
+$plugin_description = gettext("A Zenphoto plugin for displaying OpenStreetMap based maps using LeafletJS for images or images from albums with embeded geodata.");
 $plugin_author = "Malte Müller (acrylian)";
-$plugin_version = '1.0';
+$plugin_version = '1.0beta';
 $option_interface = 'zpOpenStreetMapOptions';
 
 zp_register_filter('theme_head', 'zpOpenStreetMap::scripts');
