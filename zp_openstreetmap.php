@@ -1,20 +1,21 @@
 <?php
 /**
- * A Zenphoto plugin for showing OpenStreetMap maps using LeafletJS (http://leafletjs.com) for images or images from albums with embeded geodata or maps with custom geodata.
+ * A Zenphoto plugin for showing OpenStreetMap maps using LeafletJS (http://leafletjs.com) for images or images from * 
+ * albums with embeded geodata or maps with custom geodata.
  * Also includes 
  * - marker cluster plugin https://github.com/Leaflet/Leaflet.markercluster by Dave Leaver
  * - MousePosition plugin https://github.com/ardhi/Leaflet.MousePosition by Ardhi Lukianto
  * 
  * @author Malte Müller (acrylian) <info@maltem.de>
- * @copyright 2015 Malte Müller
- * @license GPL v3 or later
+ * @copyright 2015 Malte Müller (acrylian)
+ * @licence GPL v3 or later
  * @package plugins
  * @subpackage media
  */
 $plugin_is_filter = 5 | THEME_PLUGIN;
 $plugin_description = gettext("A Zenphoto plugin for displaying OpenStreetMap based maps using LeafletJS for images or images from albums with embeded geodata.");
 $plugin_author = "Malte Müller (acrylian)";
-$plugin_version = '1.0beta';
+$plugin_version = '1.0.1';
 $option_interface = 'zpOpenStreetMapOptions';
 
 zp_register_filter('theme_head', 'zpOpenStreetMap::scripts');
@@ -152,21 +153,22 @@ class zpOpenStreetMap {
   var $class = '';
 
   /**
-   * "single" (one marker)
+  * "single" (one marker)
    * "cluster" (several markers always clustered)
-   * "single-cluster" (markers of the images of the current album with the current image highlighted)
+   * "single-cluster" (markers of the images of the current album)
    * Default created by the $geodata property: "single "if array with one entry, "cluster" if more entries
    * @var string
    */
   var $mode = NULL;
   
-   /**
+  /**
    * 
    * Default false if set to true on single image maps the markers of all other images are shown as well.
    * The current image's position will be highlighted.
    * @var bool
    */
   var $showalbummarkers = false;
+
   /**
    * geodata array(lat,lng)
    * Default created from the image marker or from the markers of the images of an album if in context
@@ -234,7 +236,6 @@ class zpOpenStreetMap {
    * @var bool
    */
   var $markerpopup_thumb = false;
-  
   var $showmarkers = true;
 
   /**
@@ -304,21 +305,7 @@ class zpOpenStreetMap {
    * @param obj Image or album object If set this object is used and $geodatat is ignored if set as well
    */
   function __construct($geodata = NULL, $obj = NULL) {
-    global $_zp_gallery_page, $_zp_current_image, $_zp_current_album, $_zp_current_search;
-    $this->center = $this->getCenter();
-    $this->fitbounds = $this->getFitBounds();
-    $this->width = getOption('osmap_width');
-    $this->height = getOption('osmap_height');
-    $this->zoom = getOption('osmap_zoom');
-    $this->minzoom = getOption('osmap_minzoom');
-    $this->maxzoom = getOption('osmap_maxzoom');
-    $this->maptiles = $this->tileproviders[getOption('osmap_maptiles')];
-    $this->clusterradius = getOption('osmap_clusterradius');
-    $this->markerpopup = getOption('osmap_markerpopup');
-    $this->controlpos = getOption('osmap_controlpos');
-    $this->showscale = getOption('osmap_showscale');
-    $this->showcursorpos = getOption('osmap_showcursorpos');
-    $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
+    global $_zp_gallery_page, $_zp_current_image, $_zp_current_album;
     $this->showalbummarkers = getOption('osmap_showalbummarkers');
     if (is_object($obj)) {
       if (isImageClass($obj)) {
@@ -351,15 +338,29 @@ class zpOpenStreetMap {
           case 'favorites.php':
             $this->obj = $_zp_current_album;
             $this->mode = 'cluster';
-            break;
+            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
           case 'search.php':
-            $this->obj = $_zp_current_search;
             $this->mode = 'cluster';
+            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
             break;
         }
       }
     }
+    $this->center = $this->getCenter();
+    $this->fitbounds = $this->getFitBounds();
     $this->geodata = $this->getGeoData();
+    $this->width = getOption('osmap_width');
+    $this->height = getOption('osmap_height');
+    $this->zoom = getOption('osmap_zoom');
+    $this->minzoom = getOption('osmap_minzoom');
+    $this->maxzoom = getOption('osmap_maxzoom');
+    $this->maptiles = $this->tileproviders[getOption('osmap_maptiles')];
+    $this->clusterradius = getOption('osmap_clusterradius');
+    $this->markerpopup = getOption('osmap_markerpopup');
+    $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
+    $this->controlpos = getOption('osmap_controlpos');
+    $this->showscale = getOption('osmap_showscale');
+    $this->showcursorpos = getOption('osmap_showcursorpos');
   }
 
   /**
@@ -370,7 +371,7 @@ class zpOpenStreetMap {
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.Default.css" />
-	<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/zp_openstreetmap.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/zp_openstreetmap.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.css" />
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.js"></script>
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.markercluster.js"></script>
@@ -402,7 +403,7 @@ class zpOpenStreetMap {
         }
         $thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getThumb() . "' alt='' /></a>";
         $current = 0;
-        if($this->mode = 'single-cluster' && isset($_zp_current_image) && $image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname()) {
+        if($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
           $current = 1;
         }
         $result = array(
@@ -454,8 +455,8 @@ class zpOpenStreetMap {
           $geodata = array($imggeodata);
         }
         break;
-      case 'cluster':
       case 'single-cluster':
+      case 'cluster':
         $albgeodata = $this->getAlbumGeodata($this->obj);
         if(!empty($albgeodata)) {
           $geodata = $albgeodata;
@@ -528,6 +529,7 @@ class zpOpenStreetMap {
    * @return array
    */
   function getCenter() {
+    //$this->center = array(53.18, 10.38); //demotest
     if (!is_null($this->center)) {
       return $this->center;
     }
@@ -537,11 +539,15 @@ class zpOpenStreetMap {
         case 'single':
           $this->center = array($geodata[0]['lat'], $geodata[0]['long']);
           break;
-        case 'cluster':
-          //for demo tests only needs to be calculated properly later on!
-          $this->center = array($geodata[0]['lat'], $geodata[0]['long']);  
-          break;
         case 'single-cluster':
+          foreach($geodata as $geo) {
+            if($geo['current'] == 1) {
+              $this->center = array($geo['lat'], $geo['long']);
+              break;
+            }
+          }
+          break;
+        case 'cluster':
           //for demo tests only needs to be calculated properly later on!
           $this->center = array($geodata[0]['lat'], $geodata[0]['long']);  
           break;
@@ -554,92 +560,75 @@ class zpOpenStreetMap {
    * Prints the required HTML and JS for the map
    */
   function printMap() {
-    global $_zp_current_image;
     $class = '';
     if (!empty($this->class)) {
       $class = ' class="' . $this->class . '"';
     }
     $geodataJS = $this->getGeoDataJS();
     if(!empty($geodataJS)) {
-    ?>
+      ?>
       <div id="osm_map<?php echo $this->mapnumber; ?>"<?php echo $class; ?> style="width:<?php echo $this->width; ?>; height:<?php echo $this->height; ?>;"></div>
       <script>
         var geodata = new Array();
         <?php echo $geodataJS; ?>
         var map = L.map('osm_map<?php echo $this->mapnumber; ?>', {
-          //center: [<?php echo $this->center[0]; ?>,<?php echo $this->center[1]; ?>], 
+          center: [<?php echo $this->center[0]; ?>,<?php echo $this->center[1]; ?>], 
           zoom: <?php echo $this->zoom; ?>, //option
           zoomControl: false, // disable so we can position it below
           minZoom: <?php echo $this->minzoom; ?>,
           maxZoom: <?php echo $this->maxzoom; ?>,
           layers: [<?php echo $this->maptiles; ?>] //option => prints variable name stored in tile-definitions.js
         });
-        var currentIcon = L.icon({
-          iconUrl: 'images/marker-icon.png',
-          iconRetinaUrl: 'images/marker-icon-2x.png'
-        });
-        var otherIcon = L.icon({
-          iconUrl: 'images/marker-icon-grey.png.png',
-          iconRetinaUrl: 'images/marker-icon-grey-2x.png'
-        });
-       <?php 
-       if($this->mode == 'cluster' && $this->fitbounds) { 
+
+        <?php 
+        if($this->mode == 'cluster' && $this->fitbounds) {  
         ?>
         map.fitBounds([<?php echo $this->fitbounds; ?>]);
-       <?php } ?>
-       <?php if($this->showscale) { ?>
-        L.control.scale().addTo(map);
-       <?php } ?>
+        <?php }  
+        if($this->showscale) { ?>
+          L.control.scale().addTo(map);
+        <?php } ?>
 
-       L.control.zoom({position: '<?php echo $this->controlpos; ?>'}).addTo(map);
-       <?php if($this->showcursorpos) { ?>
-        L.control.mousePosition().addTo(map);
-       <?php } ?>
-
-      <?php
-      if(!empty($geodataJS)) {
-       switch ($this->mode) {
-        case 'single':
-         ?>
-          var marker = L.marker([geodata[0]['lat'], geodata[0]['long']]).addTo(map); // from image
-         <?php
-         break;
-        case 'cluster':
-         ?>
-          var markers_cluster = new L.MarkerClusterGroup({ maxClusterRadius: <?php echo $this->clusterradius; ?> }); //radius > Option
-          $.each(geodata, function (index, value) {
-           var icon = currentIcon;
-           var text = '';
-          <?php if ($this->markerpopup) { ?>
-            text = value.title;
-          <?php if ($this->markerpopup_thumb) { ?>
-             text += value.thumb;
-          <?php } ?>
-            text += value.desc;
-         <?php } ?>
-           <?php if (isset($_zp_current_image) && $this->mode == 'single-cluster') { ?>
-             if(value.current === 1) {
-               icon = currentIcon;
-             } else {
-               icon = otherIcon;
-             }
-           <?php } ?>
-           if (text === '') {
-            markers_cluster.addLayer(L.marker( [value.lat, value.long], { icon: icon } ));
-           } else {
-            markers_cluster.addLayer(L.marker( [value.lat, value.long], { icon: icon } ).bindPopup(text));
-           }
-          });
-          map.addLayer(markers_cluster);
-         <?php
-         break;
-       }
+        L.control.zoom({position: '<?php echo $this->controlpos; ?>'}).addTo(map);
+        <?php if($this->showcursorpos) { ?>
+          L.control.mousePosition().addTo(map);
+        <?php } 
+        if($this->showmarkers) {
+          switch ($this->mode) {
+          case 'single':
+            ?>
+            var marker = L.marker([geodata[0]['lat'], geodata[0]['long']]).addTo(map); // from image
+            <?php
+            break;
+          case 'single-cluster':
+          case 'cluster':
+           ?>
+            var markers_cluster = new L.MarkerClusterGroup({ maxClusterRadius: <?php echo $this->clusterradius; ?> }); //radius > Option
+            $.each(geodata, function (index, value) {
+              var text = '';
+              <?php if ($this->markerpopup) { ?>
+                text = value.title;
+              <?php if ($this->markerpopup_thumb) { ?>
+                text += value.thumb;
+              <?php } ?>
+                text += value.desc;
+              <?php } ?>
+              if (text === '') {
+                markers_cluster.addLayer(L.marker([value.lat, value.long]));
+              } else {
+                markers_cluster.addLayer(L.marker([value.lat, value.long]).bindPopup(text));
+              }
+            });
+            map.addLayer(markers_cluster);
+          <?php
+          break;
+         }
       }
-      ?>
-      </script>
-      <?php
     }
-  }// empty geodata
+		?>
+		</script>
+		<?php
+	}
 
 }
 
