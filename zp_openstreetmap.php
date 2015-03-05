@@ -234,6 +234,7 @@ class zpOpenStreetMap {
    * @var bool
    */
   var $markerpopup_thumb = false;
+  
   var $showmarkers = true;
 
   /**
@@ -566,7 +567,7 @@ class zpOpenStreetMap {
         var geodata = new Array();
         <?php echo $geodataJS; ?>
         var map = L.map('osm_map<?php echo $this->mapnumber; ?>', {
-          center: [<?php echo $this->center[0]; ?>,<?php echo $this->center[1]; ?>], 
+          //center: [<?php echo $this->center[0]; ?>,<?php echo $this->center[1]; ?>], 
           zoom: <?php echo $this->zoom; ?>, //option
           zoomControl: false, // disable so we can position it below
           minZoom: <?php echo $this->minzoom; ?>,
@@ -596,7 +597,7 @@ class zpOpenStreetMap {
        <?php } ?>
 
       <?php
-      if($this->showmarkers && !empty($geodataJS)) {
+      if(!empty($geodataJS)) {
        switch ($this->mode) {
         case 'single':
          ?>
