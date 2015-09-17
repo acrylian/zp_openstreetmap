@@ -5,6 +5,7 @@
  * Also includes 
  * - marker cluster plugin https://github.com/Leaflet/Leaflet.markercluster by Dave Leaver
  * - MousePosition plugin https://github.com/ardhi/Leaflet.MousePosition by Ardhi Lukianto
+ * - Leaflet-MiniMap plugin: https://github.com/Norkart/Leaflet-MiniMap
  * 
  * @author Malte Müller (acrylian) <info@maltem.de>
  * @copyright 2015 Malte Müller (acrylian)
@@ -15,7 +16,7 @@
 $plugin_is_filter = 5 | THEME_PLUGIN;
 $plugin_description = gettext("A Zenphoto plugin for displaying OpenStreetMap based maps using LeafletJS for images or images from albums with embeded geodata.");
 $plugin_author = "Malte Müller (acrylian)";
-$plugin_version = '1.0.1';
+$plugin_version = '1.1';
 $option_interface = 'zpOpenStreetMapOptions';
 
 zp_register_filter('theme_head', 'zpOpenStreetMap::scripts');
@@ -35,6 +36,10 @@ class zpOpenStreetMapOptions {
     setOptionDefault('osmap_markerpopup_thumb', 1);
     setOptionDefault('osmap_showscale', 1);
     setOptionDefault('osmap_showalbummarkers', 0);
+    setOptionDefault('osmap_showminimap', 0);
+    setOptionDefault('osmap_minimap_width', 100);
+    setOptionDefault('osmap_minimap_height', 100);
+    setOptionDefault('osmap_minimap_zoom', -5);
   }
 
   function getOptionsSupported() {
@@ -89,7 +94,7 @@ class zpOpenStreetMapOptions {
         gettext('Cluster radius') => array(
             'key' => 'osmap_clusterradius',
             'type' => OPTION_TYPE_TEXTBOX,
-            'desc' => gettext("The radious when marker clusters should be used.")),
+            'desc' => gettext("The radius when marker clusters should be used.")),
         gettext('Marker popups') => array(
             'key' => 'osmap_markerpopup',
             'type' => OPTION_TYPE_CHECKBOX,
@@ -99,19 +104,35 @@ class zpOpenStreetMapOptions {
             'type' => OPTION_TYPE_CHECKBOX,
             'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
         gettext('Show scale') => array(
-            'key' => 'osmap_showscale',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable if you want to show scale overlay (kilometers and miles).")),
-        gettext('Show cursor position') => array(
-            'key' => 'osmap_showcursorpos',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable if you want to show the coordinates if moving the cursor over the map.")),
-        gettext('Show album markers') => array(
-            'key' => 'osmap_showalbummarkers',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable if you want to show the map on the single image page not only the marker of the current image but all markers from the album. The current position will be highlighted."))
-    );
-  }
+						'key' => 'osmap_showscale',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable if you want to show scale overlay (kilometers and miles).")),
+				gettext('Show cursor position') => array(
+						'key' => 'osmap_showcursorpos',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable if you want to show the coordinates if moving the cursor over the map.")),
+				gettext('Show album markers') => array(
+						'key' => 'osmap_showalbummarkers',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable if you want to show the map on the single image page not only the marker of the current image but all markers from the album. The current position will be highlighted.")),
+				gettext('Mini map') => array(
+						'key' => 'osmap_showminimap',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable if you want to show an overview mini map in the lower right corner.")),
+				gettext('Mini map: Width') => array(
+						'key' => 'osmap_minimap_width',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Pixel width.")),
+				gettext('Mini map: height') => array(
+						'key' => 'osmap_minimap_height',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Pixel height")),
+				gettext('Mini map: Zoom level') => array(
+						'key' => 'osmap_minimap_zoom',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("The offset applied to the zoom in the minimap compared to the zoom of the main map. Can be positive or negative, defaults to -5."))
+		);
+	}
 
 }
 
@@ -237,7 +258,15 @@ class zpOpenStreetMap {
    */
   var $markerpopup_thumb = false;
   var $showmarkers = true;
-
+   /**
+   * Mini map parameters
+   * @var string
+   */
+  var $showminimap = false;
+  var $minimap_width = 100;
+  var $minimap_height = 100;
+  var $minimap_zoom = -5;
+  
   /**
    * Position of the map controls: "topleft", "topright", "bottomleft", "bottomright"
    * Default taken from plugin options
@@ -347,23 +376,27 @@ class zpOpenStreetMap {
       }
     }
     $this->center = $this->getCenter();
-    $this->fitbounds = $this->getFitBounds();
-    $this->geodata = $this->getGeoData();
-    $this->width = getOption('osmap_width');
-    $this->height = getOption('osmap_height');
-    $this->zoom = getOption('osmap_zoom');
-    $this->minzoom = getOption('osmap_minzoom');
-    $this->maxzoom = getOption('osmap_maxzoom');
-    $this->maptiles = $this->tileproviders[getOption('osmap_maptiles')];
-    $this->clusterradius = getOption('osmap_clusterradius');
-    $this->markerpopup = getOption('osmap_markerpopup');
-    $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
-    $this->controlpos = getOption('osmap_controlpos');
-    $this->showscale = getOption('osmap_showscale');
-    $this->showcursorpos = getOption('osmap_showcursorpos');
-  }
+		$this->fitbounds = $this->getFitBounds();
+		$this->geodata = $this->getGeoData();
+		$this->width = getOption('osmap_width');
+		$this->height = getOption('osmap_height');
+		$this->zoom = getOption('osmap_zoom');
+		$this->minzoom = getOption('osmap_minzoom');
+		$this->maxzoom = getOption('osmap_maxzoom');
+		$this->maptiles = $this->tileproviders[getOption('osmap_maptiles')];
+		$this->clusterradius = getOption('osmap_clusterradius');
+		$this->markerpopup = getOption('osmap_markerpopup');
+		$this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
+		$this->controlpos = getOption('osmap_controlpos');
+		$this->showscale = getOption('osmap_showscale');
+		$this->showcursorpos = getOption('osmap_showcursorpos');
+		$this->showminimap = getOption('osmap_showminimap');
+		$this->minimap_width = getOption('osmap_minimap_width');
+		$this->minimap_height = getOption('osmap_minimap_height');
+		$this->minimap_zoom = getOption('osmap_minimap_zoom');
+	}
 
-  /**
+	/**
    * Assigns the needed JS and CSS
    */
   static function scripts() {
@@ -372,12 +405,32 @@ class zpOpenStreetMap {
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.Default.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/zp_openstreetmap.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.css" />
+    <?php 
+		if (getOption('osmap_showcursorpos')) {
+			?>
+    	<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.css" />
+    	<?php 
+    } 
+   	if (getOption('osmap_showminimap')) { 
+   		?>
+   		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/Control.MiniMap.min.css" />
+   		<?php 
+   	} 
+   	?>
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.js"></script>
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.markercluster.js"></script>
     <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/tile-definitions.js"></script>
-    <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.js"></script>
-    <?php
+    <?php 
+    if (getOption('osmap_showcursorpos')) { 
+    	?>
+    	<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.js"></script>
+    	<?php 
+    } 
+    if (getOption('osmap_showminimap')) { 
+    	?>
+   	 	<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/Control.MiniMap.min.js"></script>
+    	<?php
+    }
   }
 
   /**
@@ -406,7 +459,10 @@ class zpOpenStreetMap {
         if($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
           $current = 1;
         }
-        $result = array(
+				//in case European comma decimals sneaked in
+				$lat_f = str_replace(',', '.', $lat_f);
+				$long_f = str_replace(',', '.', $long_f);
+				$result = array(
             'lat' => $lat_f,
             'long' => $long_f,
             'title' => shortenContent(js_encode($image->getTitle()),50,'...').'<br />',
@@ -585,6 +641,17 @@ class zpOpenStreetMap {
         ?>
         map.fitBounds([<?php echo $this->fitbounds; ?>]);
         <?php }  
+        if($this->showminimap) {
+        	?>
+        	var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+					var osm2 = new L.TileLayer(osmUrl);
+					var miniMap = new L.Control.MiniMap(osm2, { 
+						toggleDisplay: true,
+						zoomLevelOffset: <?php echo $this->minimap_zoom; ?>,
+						width: <?php echo $this->minimap_width; ?>,
+						height: <?php echo $this->minimap_height; ?>
+					}).addTo(map);
+				<?php }
         if($this->showscale) { ?>
           L.control.scale().addTo(map);
         <?php } ?>
@@ -652,8 +719,9 @@ class zpOpenStreetMap {
  * @param string $class Class name to attach to the map element
  * @param int $mapnumber If calling more than one map per page an unique number is required
  * @param obj $obj Image or album object to skip current image or album and also $geodata
+ * @param bool $minimap True to show the minimap in the lower right corner
  */
-function printOpenStreetMap($geodata = NULL, $width = NULL, $height= NULL, $mapcenter = NULL, $zoom = NULL, $fitbounds = NULL, $class = '', $mapnumber = NULL,$obj = NULL) {
+function printOpenStreetMap($geodata = NULL, $width = NULL, $height= NULL, $mapcenter = NULL, $zoom = NULL, $fitbounds = NULL, $class = '', $mapnumber = NULL,$obj = NULL, $minimap = false) {
   if (!empty($class)) {
     $class = ' class="' . $class . '"';
   }
@@ -679,5 +747,8 @@ function printOpenStreetMap($geodata = NULL, $width = NULL, $height= NULL, $mapc
   if (!is_null($mapnumber)) {
     $map->mapnumber = $mapnumber;
   }
-  $map->printMap();
+  if ($minimap) {
+		$map->showminimap = true;
+	}
+	$map->printMap();
 }
