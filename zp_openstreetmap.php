@@ -16,7 +16,7 @@
 $plugin_is_filter = 5 | THEME_PLUGIN;
 $plugin_description = gettext("A Zenphoto plugin for displaying OpenStreetMap based maps using LeafletJS for images or images from albums with embeded geodata.");
 $plugin_author = "Malte Müller (acrylian)";
-$plugin_version = '1.1';
+$plugin_version = '1.1.1';
 $option_interface = 'zpOpenStreetMapOptions';
 
 zp_register_filter('theme_head', 'zpOpenStreetMap::scripts');
@@ -544,8 +544,8 @@ class zpOpenStreetMap {
         $js_geodata .= ' geodata[' . $count . '] = {
                   lat : "' . $geo['lat'] . '",
                   long : "' . $geo['long'] . '",
-                  title : "' . shortenContent(js_encode($geo['title'],50,'...')) . '",
-                  desc : "' . shortenContent(js_encode($geo['desc'],100,'...')) . '",
+                  title : "' . js_encode(shortenContent($geo['title'],50,'...')) . '",
+                  desc : "' . js_encode(shortenContent($geo['desc'],100,'...')) . '",
                   thumb : "' . $geo['thumb'] . '",
                   current : "' . $geo['current'] . '"
                 };';
