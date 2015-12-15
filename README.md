@@ -14,7 +14,7 @@ License: GPL v3 or later
   
 Usage
 ----------
-Copy the theme files (file and folder) to your `plugins` folder and enable the plugin.
+Put the file `zp_openstreetmap.php` and the folder of the same name into your `/plugins` folder and enable it.
 
 ###Standard theme usage
 Place the function `printOpenStreetMap()` on your theme's `album.php` and/or `image.php` where you wish the map to appear. If there is no metadata available the map will not be printed.
