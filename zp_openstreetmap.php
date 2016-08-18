@@ -16,7 +16,7 @@
 $plugin_is_filter = 5 | THEME_PLUGIN;
 $plugin_description = gettext("A Zenphoto plugin for displaying OpenStreetMap based maps using LeafletJS for images or images from albums with embeded geodata.");
 $plugin_author = "Malte Müller (acrylian)";
-$plugin_version = '1.1.1';
+$plugin_version = '1.1.2';
 $option_interface = 'zpOpenStreetMapOptions';
 
 zp_register_filter('theme_head', 'zpOpenStreetMap::scripts');
@@ -83,8 +83,6 @@ class zpOpenStreetMapOptions {
                 'Thunderforest_Landscape' => 'Thunderforest_Landscape',
                 'Thunderforest_Outdoors' => 'Thunderforest_Outdoors',
                 'OpenMapSurfer_Roads' => 'OpenMapSurfer_Roads',
-                'MapQuestOpen_OSM' => 'MapQuestOpen_OSM',
-                'MapQuestOpen_Aerial' => 'MapQuestOpen_Aerial',
                 'Stamen_Toner' => 'Stamen_Toner',
                 'Stamen_TonerBackground' => 'Stamen_TonerBackground',
                 'Stamen_TonerLite' => 'Stamen_TonerLite',
