@@ -24,25 +24,29 @@ zp_register_filter('theme_head', 'zpOpenStreetMap::scripts');
 class zpOpenStreetMapOptions {
 
   function __construct() {
-    setOptionDefault('osmap_width', '100%'); //responsive by default!
-    setOptionDefault('osmap_height', '300px');
-    setOptionDefault('osmap_zoom', 4);
-    setOptionDefault('osmap_minzoom', 2);
-    setOptionDefault('osmap_maxzoom', 18);
-    setOptionDefault('osmap_controlpos', 'topleft');
-    setOptionDefault('osmap_maptiles', 'OpenStreetMap_Mapnik');
-    setOptionDefault('osmap_clusterradius', 40);
-    setOptionDefault('osmap_markerpopup', 1);
-    setOptionDefault('osmap_markerpopup_thumb', 1);
-    setOptionDefault('osmap_showscale', 1);
-    setOptionDefault('osmap_showalbummarkers', 0);
-    setOptionDefault('osmap_showminimap', 0);
-    setOptionDefault('osmap_minimap_width', 100);
-    setOptionDefault('osmap_minimap_height', 100);
-    setOptionDefault('osmap_minimap_zoom', -5);
-  }
+		setOptionDefault('osmap_width', '100%'); //responsive by default!
+		setOptionDefault('osmap_height', '300px');
+		setOptionDefault('osmap_zoom', 4);
+		setOptionDefault('osmap_minzoom', 2);
+		setOptionDefault('osmap_maxzoom', 18);
+		setOptionDefault('osmap_controlpos', 'topleft');
+		setOptionDefault('osmap_maptiles', 'OpenStreetMap_Mapnik');
+		setOptionDefault('osmap_clusterradius', 40);
+		setOptionDefault('osmap_markerpopup', 1);
+		setOptionDefault('osmap_markerpopup_thumb', 1);
+		setOptionDefault('osmap_showscale', 1);
+		setOptionDefault('osmap_showalbummarkers', 0);
+		setOptionDefault('osmap_showminimap', 0);
+		setOptionDefault('osmap_minimap_width', 100);
+		setOptionDefault('osmap_minimap_height', 100);
+		setOptionDefault('osmap_minimap_zoom', -5);
+		if (class_exists('cacheManager')) {
+			cacheManager::deleteThemeCacheSizes('zp_openstreetmap');
+			cacheManager::addThemeCacheSize('zp_openstreetmap', 150, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, NULL, NULL);
+		}
+	}
 
-  function getOptionsSupported() {
+	function getOptionsSupported() {
     return array(
         gettext('Map dimensions—width') => array(
             'key' => 'osmap_width',
@@ -452,7 +456,7 @@ class zpOpenStreetMap {
         if (strtoupper(@$exif['EXIFGPSLongitudeRef']{0}) == 'W') {
           $long_f = -$long_f;
         }
-        $thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getThumb() . "' alt='' /></a>";
+        $thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getCustomImageURL(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='' /></a>";
         $current = 0;
         if($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
           $current = 1;
