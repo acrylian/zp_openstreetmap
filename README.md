@@ -14,13 +14,17 @@ License: GPL v3 or later
   
 Usage
 ----------
+
 Put the file `zp_openstreetmap.php` and the folder of the same name into your `/plugins` folder and enable it.
 
-###Standard theme usage
+### Standard theme usage
+
 Place the function `printOpenStreetMap()` on your theme's `album.php` and/or `image.php` where you wish the map to appear. If there is no metadata available the map will not be printed.
 
-###Custom maps beyond current image/album
+### Custom maps beyond current image/album
+
 #### Individual images or albums
+
 You can also create maps from any image or album using the zpOpenStreetMap class (see the file itself for more detailed documentation on which properties you can set):
 
 ```php
@@ -38,6 +42,7 @@ printOpenStreetMap(NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, $object);`
 ```
 
 #### Custom maps based on custom geodata
+
 Custom maps without any image or album involved work the same way. Just passing an array to the custructor. This array must be structured like this:
 
 ```php
