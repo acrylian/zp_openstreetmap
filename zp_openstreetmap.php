@@ -446,6 +446,9 @@ class zpOpenStreetMap {
     if (isImageClass($image)) {
       $exif = $image->getMetaData();
       if ((!empty($exif['EXIFGPSLatitude'])) && (!empty($exif['EXIFGPSLongitude']))) {
+	// Panasonic cams without GPS fix return 17056881,853375 as latitude and longitude, ignore that
+        if ($exif['EXIFGPSLatitude']=='17056881,853375' && $exif['EXIFGPSLongitude']=='17056881,853375') { return array(); }
+
         $lat_c = explode('.', str_replace(',', '.', $exif['EXIFGPSLatitude']) . '.0');
         $lat_f = round((float) abs($lat_c[0]) + ($lat_c[1] / pow(10, strlen($lat_c[1]))), 12);
         if (strtoupper(@$exif['EXIFGPSLatitudeRef']{0}) == 'S') {
