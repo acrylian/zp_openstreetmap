@@ -456,7 +456,7 @@ class zpOpenStreetMap {
         if (strtoupper(@$exif['EXIFGPSLongitudeRef']{0}) == 'W') {
           $long_f = -$long_f;
         }
-        $thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getCustomImageURL(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='' /></a>";
+        $thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getCustomImage(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='' /></a>";
         $current = 0;
         if($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
           $current = 1;
