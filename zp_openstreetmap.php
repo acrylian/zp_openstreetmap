@@ -444,8 +444,12 @@ class zpOpenStreetMap {
     global $_zp_current_image;
     $result = array();
     if (isImageClass($image)) {
-      $exif = $image->getMetaData();
+      $_zp_current_image = $image;
+      $exif = $_zp_current_image->getMetaData();
       if ((!empty($exif['EXIFGPSLatitude'])) && (!empty($exif['EXIFGPSLongitude']))) {
+	// Panasonic cams without GPS fix return 17056881,853375 as latitude and longitude, ignore that
+        if ($exif['EXIFGPSLatitude']=='17056881,853375' && $exif['EXIFGPSLongitude']=='17056881,853375') { return array(); }
+
         $lat_c = explode('.', str_replace(',', '.', $exif['EXIFGPSLatitude']) . '.0');
         $lat_f = round((float) abs($lat_c[0]) + ($lat_c[1] / pow(10, strlen($lat_c[1]))), 12);
         if (strtoupper(@$exif['EXIFGPSLatitudeRef']{0}) == 'S') {
@@ -456,19 +460,20 @@ class zpOpenStreetMap {
         if (strtoupper(@$exif['EXIFGPSLongitudeRef']{0}) == 'W') {
           $long_f = -$long_f;
         }
-        $thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getCustomImageURL(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='' /></a>";
+	$thumb = "<a href='" . $_zp_current_image->getLink() . "'><img src='" . getCustomImageURL(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='".$_zp_current_image->filename."' /></a>";
+
         $current = 0;
         if($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
           $current = 1;
         }
-				//in case European comma decimals sneaked in
-				$lat_f = str_replace(',', '.', $lat_f);
-				$long_f = str_replace(',', '.', $long_f);
-				$result = array(
+	//in case European comma decimals sneaked in
+	$lat_f = str_replace(',', '.', $lat_f);
+	$long_f = str_replace(',', '.', $long_f);
+	$result = array(
             'lat' => $lat_f,
             'long' => $long_f,
-            'title' => shortenContent($image->getTitle(),50,'...').'<br />',
-            'desc' => shortenContent($image->getDesc(),100,'...'),
+            'title' => shortenContent($_zp_current_image->getTitle(),50,'...').'<br />',
+            'desc' => shortenContent($_zp_current_image->getDesc(),100,'...'),
             'thumb' => $thumb,
             'current' => $current
         );
