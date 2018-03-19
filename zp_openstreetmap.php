@@ -103,6 +103,10 @@ class zpOpenStreetMapOptions {
             'key' => 'osmap_markerpopup',
             'type' => OPTION_TYPE_CHECKBOX,
             'desc' => gettext("Enable this if you wish info popups on the map markers. Only for album context or custom geodata.")),
+	gettext('Marker popups with thumbs') => array(
+            'key' => 'osmap_markerpopup_thumb',
+            'type' => OPTION_TYPE_CHECKBOX,
+            'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
 	gettext('Marker popups with title') => array(
             'key' => 'osmap_markerpopup_title',
             'type' => OPTION_TYPE_CHECKBOX,
@@ -111,10 +115,6 @@ class zpOpenStreetMapOptions {
             'key' => 'osmap_markerpopup_desc',
             'type' => OPTION_TYPE_CHECKBOX,
             'desc' => gettext("Enable if you want to show desc of images in the marker popups. Only for album context.")),
-	gettext('Marker popups with thumbs') => array(
-            'key' => 'osmap_markerpopup_thumb',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
         gettext('Show scale') => array(
 						'key' => 'osmap_showscale',
 						'type' => OPTION_TYPE_CHECKBOX,
