@@ -33,6 +33,8 @@ class zpOpenStreetMapOptions {
 		setOptionDefault('osmap_maptiles', 'OpenStreetMap_Mapnik');
 		setOptionDefault('osmap_clusterradius', 40);
 		setOptionDefault('osmap_markerpopup', 1);
+		setOptionDefault('osmap_markerpopup_title', 1);
+		setOptionDefault('osmap_markerpopup_desc', 1);
 		setOptionDefault('osmap_markerpopup_thumb', 1);
 		setOptionDefault('osmap_showscale', 1);
 		setOptionDefault('osmap_showalbummarkers', 0);
@@ -101,7 +103,21 @@ class zpOpenStreetMapOptions {
             'key' => 'osmap_markerpopup',
             'type' => OPTION_TYPE_CHECKBOX,
             'desc' => gettext("Enable this if you wish info popups on the map markers. Only for album context or custom geodata.")),
-        gettext('Marker popups with thumbs') => array(
+/*
+		gettext('Marker popups with thumbs') => array(
+            'key' => 'osmap_markerpopup_thumb',
+            'type' => OPTION_TYPE_CHECKBOX,
+            'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
+*/
+		gettext('Marker popups with title') => array(
+            'key' => 'osmap_markerpopup_title',
+            'type' => OPTION_TYPE_CHECKBOX,
+            'desc' => gettext("Enable if you want to show title of images in the marker popups. Only for album context.")),
+		gettext('Marker popups with description') => array(
+            'key' => 'osmap_markerpopup_desc',
+            'type' => OPTION_TYPE_CHECKBOX,
+            'desc' => gettext("Enable if you want to show desc of images in the marker popups. Only for album context.")),
+		gettext('Marker popups with thumbs') => array(
             'key' => 'osmap_markerpopup_thumb',
             'type' => OPTION_TYPE_CHECKBOX,
             'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
@@ -258,6 +274,8 @@ class zpOpenStreetMap {
    * Default taken from plugin options
    * @var bool
    */
+  var $markerpopup_title = false;
+  var $markerpopup_desc = false;
   var $markerpopup_thumb = false;
   var $showmarkers = true;
    /**
@@ -369,9 +387,13 @@ class zpOpenStreetMap {
           case 'favorites.php':
             $this->obj = $_zp_current_album;
             $this->mode = 'cluster';
+            $this->markerpopup_title = getOption('osmap_markerpopup_title');
+            $this->markerpopup_desc = getOption('osmap_markerpopup_desc');
             $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
           case 'search.php':
             $this->mode = 'cluster';
+            $this->markerpopup_title = getOption('osmap_markerpopup_title');
+            $this->markerpopup_desc = getOption('osmap_markerpopup_desc');
             $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
             break;
         }
@@ -388,6 +410,8 @@ class zpOpenStreetMap {
 		$this->maptiles = $this->tileproviders[getOption('osmap_maptiles')];
 		$this->clusterradius = getOption('osmap_clusterradius');
 		$this->markerpopup = getOption('osmap_markerpopup');
+        $this->markerpopup_title = getOption('osmap_markerpopup_title');
+        $this->markerpopup_desc = getOption('osmap_markerpopup_desc');
 		$this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
 		$this->controlpos = getOption('osmap_controlpos');
 		$this->showscale = getOption('osmap_showscale');
@@ -645,7 +669,7 @@ class zpOpenStreetMap {
         <?php }  
         if($this->showminimap) {
         	?>
-        	var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        	var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 					var osm2 = new L.TileLayer(osmUrl);
 					var miniMap = new L.Control.MiniMap(osm2, { 
 						toggleDisplay: true,
@@ -676,11 +700,15 @@ class zpOpenStreetMap {
             $.each(geodata, function (index, value) {
               var text = '';
               <?php if ($this->markerpopup) { ?>
+              <?php if ($this->markerpopup_title) { ?>
                 text = value.title;
+			  <?php } ?>
               <?php if ($this->markerpopup_thumb) { ?>
                 text += value.thumb;
               <?php } ?>
+			  <?php if ($this->markerpopup_desc) { ?>
                 text += value.desc;
+			  <?php } ?>
               <?php } ?>
               if (text === '') {
                 markers_cluster.addLayer(L.marker([value.lat, value.long]));
