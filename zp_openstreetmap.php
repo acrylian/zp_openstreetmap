@@ -2,13 +2,16 @@
 /**
  * A Zenphoto plugin for showing OpenStreetMap maps using LeafletJS (http://leafletjs.com) for images or images from * 
  * albums with embeded geodata or maps with custom geodata.
+ * 
  * Also includes 
+ * 
  * - marker cluster plugin https://github.com/Leaflet/Leaflet.markercluster by Dave Leaver
  * - MousePosition plugin https://github.com/ardhi/Leaflet.MousePosition by Ardhi Lukianto
  * - Leaflet-MiniMap plugin: https://github.com/Norkart/Leaflet-MiniMap
+ * - leaflet-providers plugin: https://github.com/leaflet-extras/leaflet-providers
  * 
  * @author Malte Müller (acrylian) <info@maltem.de>
- * @copyright 2015 Malte Müller (acrylian)
+ * @copyright 2018 Malte Müller (acrylian)
  * @licence GPL v3 or later
  * @package plugins
  * @subpackage media
@@ -16,14 +19,14 @@
 $plugin_is_filter = 5 | THEME_PLUGIN;
 $plugin_description = gettext("A Zenphoto plugin for displaying OpenStreetMap based maps using LeafletJS for images or images from albums with embeded geodata.");
 $plugin_author = "Malte Müller (acrylian)";
-$plugin_version = '1.1.2';
+$plugin_version = '2.0';
 $option_interface = 'zpOpenStreetMapOptions';
 
 zp_register_filter('theme_head', 'zpOpenStreetMap::scripts');
 
 class zpOpenStreetMapOptions {
 
-  function __construct() {
+	function __construct() {
 		setOptionDefault('osmap_width', '100%'); //responsive by default!
 		setOptionDefault('osmap_height', '300px');
 		setOptionDefault('osmap_zoom', 4);
@@ -49,73 +52,62 @@ class zpOpenStreetMapOptions {
 	}
 
 	function getOptionsSupported() {
-    return array(
-        gettext('Map dimensions—width') => array(
-            'key' => 'osmap_width',
-            'type' => OPTION_TYPE_TEXTBOX,
-            'desc' => gettext("Width of them map including the unit name e.g 100% (default for responsive map), 100x or 100em.")),
-        gettext('Map dimensions—height') => array(
-            'key' => 'osmap_height',
-            'type' => OPTION_TYPE_TEXTBOX,
-            'desc' => gettext("Height of them map including the unit name e.g 100% (default for responsive map), 100x or 100em.")),
-        gettext('Map zoom') => array('key' => 'osmap_zoom', 'type' => OPTION_TYPE_TEXTBOX,
-            'desc' => gettext("Default zoom level.")),
-        gettext('Map minimum zoom') => array('key' => 'osmap_minzoom', 'type' => OPTION_TYPE_TEXTBOX,
-            'desc' => gettext("Default minimum zoom level possible.")),
-        gettext('Map maximum zoom') => array('key' => 'osmap_maxzoom', 'type' => OPTION_TYPE_TEXTBOX,
-            'desc' => gettext("Default maximum zoom level possible.")),
-        gettext('Controls position') => array(
-            'key' => 'osmap_maptiles',
-            'type' => OPTION_TYPE_SELECTOR,
-            'order' => 4,
-            'selections' => array(
-                gettext('Top left') => 'topleft',
-                gettext('Top right') => 'topright',
-                gettext('Bottom left') => 'bottomleft',
-                gettext('Bottom right') => 'bottomright'
-            ),
-            'desc' => gettext('Position of the map controls')),
-        gettext('Map tiles') => array(
-            'key' => 'osmap_maptiles',
-            'type' => OPTION_TYPE_SELECTOR,
-            'order' => 4,
-            'selections' => array(
-                'OpenStreetMap_Mapnik' => 'OpenStreetMap_Mapnik',
-                'OpenStreetMap_BlackAndWhite' => 'OpenStreetMap_BlackAndWhite',
-                'OpenStreetMap_DE' => 'OpenStreetMap_DE',
-                'OpenStreetMap_HOT' => 'OpenStreetMap_HOT',
-                'Thunderforest_OpenCycleMap' => 'Thunderforest_OpenCycleMap',
-                'Thunderforest_Transport' => 'Thunderforest_Transport',
-                'Thunderforest_Landscape' => 'Thunderforest_Landscape',
-                'Thunderforest_Outdoors' => 'Thunderforest_Outdoors',
-                'OpenMapSurfer_Roads' => 'OpenMapSurfer_Roads',
-                'Stamen_Toner' => 'Stamen_Toner',
-                'Stamen_TonerBackground' => 'Stamen_TonerBackground',
-                'Stamen_TonerLite' => 'Stamen_TonerLite',
-                'Stamen_Watercolor' => 'Stamen_Watercolor'
-            ),
-            'desc' => gettext('The map tile provider to use. Only free providers are included. If you wish to use any commercial provider you have to use the class base of this plugin programmatically.')),
-        gettext('Cluster radius') => array(
-            'key' => 'osmap_clusterradius',
-            'type' => OPTION_TYPE_TEXTBOX,
-            'desc' => gettext("The radius when marker clusters should be used.")),
-        gettext('Marker popups') => array(
-            'key' => 'osmap_markerpopup',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable this if you wish info popups on the map markers. Only for album context or custom geodata.")),
-	 gettext('Marker popups with thumbs') => array(
-            'key' => 'osmap_markerpopup_thumb',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
-	 gettext('Marker popups with title') => array(
-            'key' => 'osmap_markerpopup_title',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable if you want to show title of images in the marker popups. Only for album context.")),
-	 gettext('Marker popups with description') => array(
-            'key' => 'osmap_markerpopup_desc',
-            'type' => OPTION_TYPE_CHECKBOX,
-            'desc' => gettext("Enable if you want to show desc of images in the marker popups. Only for album context.")),
-        gettext('Show scale') => array(
+		$providers = array_combine(zpOpenStreetMap::getTitleProviders(), zpOpenStreetMap::getTitleProviders());
+		return array(
+				gettext('Map dimensions—width') => array(
+						'key' => 'osmap_width',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Width of them map including the unit name e.g 100% (default for responsive map), 100x or 100em.")),
+				gettext('Map dimensions—height') => array(
+						'key' => 'osmap_height',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Height of them map including the unit name e.g 100% (default for responsive map), 100x or 100em.")),
+				gettext('Map zoom') => array('key' => 'osmap_zoom', 'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Default zoom level.")),
+				gettext('Map minimum zoom') => array('key' => 'osmap_minzoom', 'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Default minimum zoom level possible.")),
+				gettext('Map maximum zoom') => array('key' => 'osmap_maxzoom', 'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Default maximum zoom level possible.")),
+				gettext('Controls position') => array(
+						'key' => 'osmap_maptiles',
+						'type' => OPTION_TYPE_SELECTOR,
+						'order' => 4,
+						'selections' => array(
+								gettext('Top left') => 'topleft',
+								gettext('Top right') => 'topright',
+								gettext('Bottom left') => 'bottomleft',
+								gettext('Bottom right') => 'bottomright'
+						),
+						'desc' => gettext('Position of the map controls')),
+				gettext('Map tiles') => array(
+						'key' => 'osmap_maptiles',
+						'type' => OPTION_TYPE_SELECTOR,
+						'order' => 4,
+						'selections' => $providers,
+						'desc' => gettext('The map tile provider to use. Only free providers are included.'
+										. ' HERE, Mapbox and Thunderforest map tiles require access credentials and Esri requires registration.'
+										. ' More info on <a href="https://github.com/leaflet-extras/leaflet-providers">leaflet-providers</a>')),
+				gettext('Cluster radius') => array(
+						'key' => 'osmap_clusterradius',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("The radius when marker clusters should be used.")),
+				gettext('Marker popups') => array(
+						'key' => 'osmap_markerpopup',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable this if you wish info popups on the map markers. Only for album context or custom geodata.")),
+				gettext('Marker popups with thumbs') => array(
+						'key' => 'osmap_markerpopup_thumb',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
+				gettext('Marker popups with title') => array(
+						'key' => 'osmap_markerpopup_title',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable if you want to show title of images in the marker popups. Only for album context.")),
+				gettext('Marker popups with description') => array(
+						'key' => 'osmap_markerpopup_desc',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Enable if you want to show desc of images in the marker popups. Only for album context.")),
+				gettext('Show scale') => array(
 						'key' => 'osmap_showscale',
 						'type' => OPTION_TYPE_CHECKBOX,
 						'desc' => gettext("Enable if you want to show scale overlay (kilometers and miles).")),
@@ -142,258 +134,264 @@ class zpOpenStreetMapOptions {
 				gettext('Mini map: Zoom level') => array(
 						'key' => 'osmap_minimap_zoom',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'desc' => gettext("The offset applied to the zoom in the minimap compared to the zoom of the main map. Can be positive or negative, defaults to -5."))
+						'desc' => gettext("The offset applied to the zoom in the minimap compared to the zoom of the main map. Can be positive or negative, defaults to -5.")),
+				gettext('Thunderforest - ApiKey') => array(
+						'key' => 'osmap_thunderforest_apikey',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => ''),
+				gettext('HERE - App id') => array(
+						'key' => 'osmap_here_appid',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => ''),
+				gettext('HERE - App code') => array(
+						'key' => 'osmap_here_appcode',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => ''),
+				gettext('Mapbox - id') => array(
+						'key' => 'osmap_mapbox_id',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => ''),
+				gettext('Mapbox - Access token') => array(
+						'key' => 'osmap_mapbox_accesstoken',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => ''),
 		);
 	}
 
 }
 
 /**
- * The base class
+ * The class for all OSM map related functionality
  */
 class zpOpenStreetMap {
 
-  /**
-   * Contains the array of the image or images from albums geodata
-   * @var array
-   */
-  var $geodata = NULL;
+	/**
+	 * Contains the array of the image or images from albums geodata
+	 * @var array
+	 */
+	var $geodata = NULL;
 
-  /**
-   * Contains a string presenting a Javascript array of geodata for leafletjs
-   * @var array
-   */
-  var $geodatajs = NULL;
+	/**
+	 * Contains a string presenting a Javascript array of geodata for leafletjs
+	 * @var array
+	 */
+	var $geodatajs = NULL;
 
-  /**
-   * geodata array('min' => array(lat,lng), 'max => array(lat,lng))
-   * Default created from an image or the images of an album. 
-   * @var array
-   */
-  var $fitbounds = NULL;
+	/**
+	 * geodata array('min' => array(lat,lng), 'max => array(lat,lng))
+	 * Default created from an image or the images of an album. 
+	 * @var array
+	 */
+	var $fitbounds = NULL;
 
-  /**
-   * geodata array(lat,lng)
-   * Default created from an image or the images of an album. 
-   * @var array
-   */
-  var $center = NULL;
+	/**
+	 * geodata array(lat,lng)
+	 * Default created from an image or the images of an album. 
+	 * @var array
+	 */
+	var $center = NULL;
 
-  /**
-   * Optional lass name to attach to the map html
-   * @var string
-   */
-  var $class = '';
+	/**
+	 * Optional lass name to attach to the map html
+	 * @var string
+	 */
+	var $class = '';
 
-  /**
-  * "single" (one marker)
-   * "cluster" (several markers always clustered)
-   * "single-cluster" (markers of the images of the current album)
-   * Default created by the $geodata property: "single "if array with one entry, "cluster" if more entries
-   * @var string
-   */
-  var $mode = NULL;
-  
-  /**
-   * 
-   * Default false if set to true on single image maps the markers of all other images are shown as well.
-   * The current image's position will be highlighted.
-   * @var bool
-   */
-  var $showalbummarkers = false;
+	/**
+	 * "single" (one marker)
+	 * "cluster" (several markers always clustered)
+	 * "single-cluster" (markers of the images of the current album)
+	 * Default created by the $geodata property: "single "if array with one entry, "cluster" if more entries
+	 * @var string
+	 */
+	var $mode = NULL;
 
-  /**
-   * geodata array(lat,lng)
-   * Default created from the image marker or from the markers of the images of an album if in context
-   * @var array
-   */
-  var $mapcenter = NULL;
+	/**
+	 * 
+	 * Default false if set to true on single image maps the markers of all other images are shown as well.
+	 * The current image's position will be highlighted.
+	 * @var bool
+	 */
+	var $showalbummarkers = false;
 
-  /**
-   * Unique number if using more than one map on a page
-   * @var int
-   */
-  var $mapnumber = '';
+	/**
+	 * geodata array(lat,lng)
+	 * Default created from the image marker or from the markers of the images of an album if in context
+	 * @var array
+	 */
+	var $mapcenter = NULL;
 
-  /**
-   * Default 100% for responsive map. Values like "100%", "100px" or "100em"
-   * Default taken from plugin options
-   * @var string
-   */
-  var $width = '100%';
+	/**
+	 * Unique number if using more than one map on a page
+	 * @var int
+	 */
+	var $mapnumber = '';
 
-  /**
-   * Values like "100px" or "100em"
-   * Default taken from plugin options
-   * @var string 
-   */
-  var $height = NULL;
+	/**
+	 * Default 100% for responsive map. Values like "100%", "100px" or "100em"
+	 * Default taken from plugin options
+	 * @var string
+	 */
+	var $width = '100%';
 
-  /**
-   * Default zoom state
-   * Default taken from plugin options
-   * @var int
-   */
-  var $zoom = NULL;
-  var $minzoom = NULL;
-  var $maxzoom = NULL;
+	/**
+	 * Values like "100px" or "100em"
+	 * Default taken from plugin options
+	 * @var string 
+	 */
+	var $height = NULL;
 
-  /**
-   * The tile provider to use. Select from the $tileprovider property like $this->maptiles = $this->tileprover['<desired provier']
-   * Default taken from plugin options
-   * Must be like array('<map provider url>','<attribution as requested>')
-   * Default taken from plugin options
-   * @var array
-   */
-  var $maptiles = NULL;
+	/**
+	 * Default zoom state
+	 * Default taken from plugin options
+	 * @var int
+	 */
+	var $zoom = NULL;
+	var $minzoom = NULL;
+	var $maxzoom = NULL;
 
-  /**
-   * Radius when clusters should be created on more than one marker
-   * Default taken from plugin options
-   * @var int
-   */
-  var $clusterradius = NULL;
+	/**
+	 * The tile provider to use. Select from the $tileprovider property like $this->maptiles = $this->tileprover['<desired provier']
+	 * Default taken from plugin options
+	 * Must be like array('<map provider url>','<attribution as requested>')
+	 * Default taken from plugin options
+	 * @var array
+	 */
+	var $maptiles = NULL;
 
-  /**
-   * If used on albums or several custom markers if you wish popups on the markers
-   * If using custom markers you need to provide the content for the popups withn the $geodata property
-   * Default taken from plugin options
-   * @var bool
-   */
-  var $markerpopup = false;
+	/**
+	 * Radius when clusters should be created on more than one marker
+	 * Default taken from plugin options
+	 * @var int
+	 */
+	var $clusterradius = NULL;
 
-  /**
-   * Only if on an album page and if $imagepopups are enabled.
-   * If the imagepopus should contain thumbs of the images
-   * Default taken from plugin options
-   * @var bool
-   */
-  var $markerpopup_title = false;
-  var $markerpopup_desc = false;
-  var $markerpopup_thumb = false;
-  var $showmarkers = true;
-   /**
-   * Mini map parameters
-   * @var string
-   */
-  var $showminimap = false;
-  var $minimap_width = 100;
-  var $minimap_height = 100;
-  var $minimap_zoom = -5;
-  
-  /**
-   * Position of the map controls: "topleft", "topright", "bottomleft", "bottomright"
-   * Default taken from plugin options
-   * @var string
-   */
-  var $controlpos = NULL;
-  
-  var $showscale = NULL;
-  var $showcursorpos = NULL;
-  
-  /**
-   * The current image or album object if not passing custom geodata
-   * @var object
-   */
-  var $obj = NULL; 
-  /**
-   * Predefined array of all free map tile providers for Open Street Map
-   * @var type 
-   */
-  var $tileproviders = array(
-      'OpenStreetMap_Mapnik' => 'OpenStreetMap_Mapnik',
-      'OpenStreetMap_BlackAndWhite' => 'OpenStreetMap_BlackAndWhite',
-      'OpenStreetMap_DE' => 'OpenStreetMap_DE',
-      'OpenStreetMap_HOT' => 'OpenStreetMap_HOT',
-      'Thunderforest_OpenCycleMap' => 'Thunderforest_OpenCycleMap',
-      'Thunderforest_Transport' => 'Thunderforest_Transport',
-      'Thunderforest_Landscape' => 'Thunderforest_Landscape',
-      'Thunderforest_Outdoors' => 'Thunderforest_Outdoors',
-      'OpenMapSurfer_Roads' => 'OpenMapSurfer_Roads',
-      'MapQuestOpen_OSM' => 'MapQuestOpen_OSM',
-      'MapQuestOpen_Aerial' => 'MapQuestOpen_Aerial',
-      'Stamen_Toner' => 'Stamen_Toner',
-      'Stamen_TonerBackground' => 'Stamen_TonerBackground',
-      'Stamen_TonerLite' => 'Stamen_TonerLite',
-      'Stamen_Watercolor' => 'Stamen_Watercolor'
-  );
+	/**
+	 * If used on albums or several custom markers if you wish popups on the markers
+	 * If using custom markers you need to provide the content for the popups withn the $geodata property
+	 * Default taken from plugin options
+	 * @var bool
+	 */
+	var $markerpopup = false;
 
-  /**
-   * If no $geodata array is passed the function gets geodata from the current image or the images of the current album
-   * if in appropiate context.
-   * 
-   * Alternatively you can pass an image or album object directly. This ignores the $geodata parameter then.
-   * 
-   * The $geodata array requires this structure:
-   * Single marker:
-   * 
-   * array(
-   *   array(
-   *      'lat' => <latitude>,
-   *      'long' => <longitude>,
-   *      'title' => 'some title',
-   *      'desc' => 'some description',
-   *      'thumb' => 'some html' // an <img src=""> call or else. 
-   *   )
-   * );
-   * 
-   * If you use html for title, desc or thumb be sure to use double quotes for attributes to avoid JS conflicts.
-   * For several markers add more arrays to the array. 
-   *
-   * If you neither pass $geodata, an object or there is no current image/album you can still display a map.
-   * But in this case you need to set the $center and $fitbounds properties manually before printing a map.
-   *
-   * @global string $_zp_gallery_page
-   * @param array $geodata Array as noted above if no current image or album should be used 
-   * @param obj Image or album object If set this object is used and $geodatat is ignored if set as well
-   */
-  function __construct($geodata = NULL, $obj = NULL) {
-    global $_zp_gallery_page, $_zp_current_image, $_zp_current_album;
-    $this->showalbummarkers = getOption('osmap_showalbummarkers');
-    if (is_object($obj)) {
-      if (isImageClass($obj)) {
-        $this->obj = $obj;
-        $this->mode = 'single';
-      } else if (isAlbumClass($obj)) {
-        $this->obj = $obj;
-        $this->mode = 'cluster';
-      }
-    } else {
-      if (is_array($geodata)) {
-        if (count($geodata) < 1) {
-          $this->mode = 'single';
-        } else {
-          $this->mode = 'cluster';
-        }
-        $this->geodata = $geodata;
-      } else {
-        switch ($_zp_gallery_page) {
-          case 'image.php':
-            if($this->showalbummarkers) {
-              $this->obj = $_zp_current_album;
-              $this->mode = 'single-cluster';
-            } else {
-              $this->obj = $_zp_current_image;
-              $this->mode = 'single';
-            }
-            break;
-          case 'album.php':
-          case 'favorites.php':
-            $this->obj = $_zp_current_album;
-            $this->mode = 'cluster';
-            $this->markerpopup_title = getOption('osmap_markerpopup_title');
-            $this->markerpopup_desc = getOption('osmap_markerpopup_desc');
-            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
-          case 'search.php':
-            $this->mode = 'cluster';
-            $this->markerpopup_title = getOption('osmap_markerpopup_title');
-            $this->markerpopup_desc = getOption('osmap_markerpopup_desc');
-            $this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
-            break;
-        }
-      }
-    }
-    $this->center = $this->getCenter();
+	/**
+	 * Only if on an album page and if $imagepopups are enabled.
+	 * If the imagepopus should contain thumbs of the images
+	 * Default taken from plugin options
+	 * @var bool
+	 */
+	var $markerpopup_title = false;
+	var $markerpopup_desc = false;
+	var $markerpopup_thumb = false;
+	var $showmarkers = true;
+
+	/**
+	 * Mini map parameters
+	 * @var string
+	 */
+	var $showminimap = false;
+	var $minimap_width = 100;
+	var $minimap_height = 100;
+	var $minimap_zoom = -5;
+
+	/**
+	 * Position of the map controls: "topleft", "topright", "bottomleft", "bottomright"
+	 * Default taken from plugin options
+	 * @var string
+	 */
+	var $controlpos = NULL;
+	var $showscale = NULL;
+	var $showcursorpos = NULL;
+
+	/**
+	 * The current image or album object if not passing custom geodata
+	 * @var object
+	 */
+	var $obj = NULL;
+
+	/**
+	 * Gers the predefined array of all free map tile providers for Open Street Map
+	 * @var array
+	 */
+	var $tileproviders = array();
+
+	/**
+	 * If no $geodata array is passed the function gets geodata from the current image or the images of the current album
+	 * if in appropiate context.
+	 * 
+	 * Alternatively you can pass an image or album object directly. This ignores the $geodata parameter then.
+	 * 
+	 * The $geodata array requires this structure:
+	 * Single marker:
+	 * 
+	 * array(
+	 *   array(
+	 *      'lat' => <latitude>,
+	 *      'long' => <longitude>,
+	 *      'title' => 'some title',
+	 *      'desc' => 'some description',
+	 *      'thumb' => 'some html' // an <img src=""> call or else. 
+	 *   )
+	 * );
+	 * 
+	 * If you use html for title, desc or thumb be sure to use double quotes for attributes to avoid JS conflicts.
+	 * For several markers add more arrays to the array. 
+	 *
+	 * If you neither pass $geodata, an object or there is no current image/album you can still display a map.
+	 * But in this case you need to set the $center and $fitbounds properties manually before printing a map.
+	 *
+	 * @global string $_zp_gallery_page
+	 * @param array $geodata Array as noted above if no current image or album should be used 
+	 * @param obj Image or album object If set this object is used and $geodatat is ignored if set as well
+	 */
+	function __construct($geodata = NULL, $obj = NULL) {
+		global $_zp_gallery_page, $_zp_current_image, $_zp_current_album;
+		$this->showalbummarkers = getOption('osmap_showalbummarkers');
+		$this->tileproviders = self::getTitleProviders();
+		if (is_object($obj)) {
+			if (isImageClass($obj)) {
+				$this->obj = $obj;
+				$this->mode = 'single';
+			} else if (isAlbumClass($obj)) {
+				$this->obj = $obj;
+				$this->mode = 'cluster';
+			}
+		} else {
+			if (is_array($geodata)) {
+				if (count($geodata) < 1) {
+					$this->mode = 'single';
+				} else {
+					$this->mode = 'cluster';
+				}
+				$this->geodata = $geodata;
+			} else {
+				switch ($_zp_gallery_page) {
+					case 'image.php':
+						if ($this->showalbummarkers) {
+							$this->obj = $_zp_current_album;
+							$this->mode = 'single-cluster';
+						} else {
+							$this->obj = $_zp_current_image;
+							$this->mode = 'single';
+						}
+						break;
+					case 'album.php':
+					case 'favorites.php':
+						$this->obj = $_zp_current_album;
+						$this->mode = 'cluster';
+						$this->markerpopup_title = getOption('osmap_markerpopup_title');
+						$this->markerpopup_desc = getOption('osmap_markerpopup_desc');
+						$this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
+					case 'search.php':
+						$this->mode = 'cluster';
+						$this->markerpopup_title = getOption('osmap_markerpopup_title');
+						$this->markerpopup_desc = getOption('osmap_markerpopup_desc');
+						$this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
+						break;
+				}
+			}
+		}
+		$this->center = $this->getCenter();
 		$this->fitbounds = $this->getFitBounds();
 		$this->geodata = $this->getGeoData();
 		$this->width = getOption('osmap_width');
@@ -401,11 +399,11 @@ class zpOpenStreetMap {
 		$this->zoom = getOption('osmap_zoom');
 		$this->minzoom = getOption('osmap_minzoom');
 		$this->maxzoom = getOption('osmap_maxzoom');
-		$this->maptiles = $this->tileproviders[getOption('osmap_maptiles')];
+		$this->maptiles = $this->setMapTiles(getOption('osmap_maptiles'));
 		$this->clusterradius = getOption('osmap_clusterradius');
 		$this->markerpopup = getOption('osmap_markerpopup');
-        $this->markerpopup_title = getOption('osmap_markerpopup_title');
-        $this->markerpopup_desc = getOption('osmap_markerpopup_desc');
+		$this->markerpopup_title = getOption('osmap_markerpopup_title');
+		$this->markerpopup_desc = getOption('osmap_markerpopup_desc');
 		$this->markerpopup_thumb = getOption('osmap_markerpopup_thumb');
 		$this->controlpos = getOption('osmap_controlpos');
 		$this->showscale = getOption('osmap_showscale');
@@ -417,308 +415,454 @@ class zpOpenStreetMap {
 	}
 
 	/**
-   * Assigns the needed JS and CSS
-   */
-  static function scripts() {
-    ?>
-    <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.Default.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/zp_openstreetmap.css" />
-    <?php 
+	 * Assigns the needed JS and CSS
+	 */
+	static function scripts() {
+		?>
+		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.css" />
+		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.css" />
+		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/MarkerCluster.Default.css" />
+		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/zp_openstreetmap.css" />
+		<?php
 		if (getOption('osmap_showcursorpos')) {
 			?>
-    	<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.css" />
-    	<?php 
-    } 
-   	if (getOption('osmap_showminimap')) { 
-   		?>
-   		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/Control.MiniMap.min.css" />
-   		<?php 
-   	} 
-   	?>
-    <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.js"></script>
-    <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.markercluster.js"></script>
-    <script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/tile-definitions.js"></script>
-    <?php 
-    if (getOption('osmap_showcursorpos')) { 
-    	?>
-    	<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.js"></script>
-    	<?php 
-    } 
-    if (getOption('osmap_showminimap')) { 
-    	?>
-   	 	<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/Control.MiniMap.min.js"></script>
-    	<?php
-    }
-  }
+			<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.css" />
+			<?php
+		}
+		if (getOption('osmap_showminimap')) {
+			?>
+			<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/Control.MiniMap.min.css" />
+			<?php
+		}
+		?>
+		<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.js"></script>
+		<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet.markercluster.js"></script>
+		<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/leaflet-providers.js"></script>
+		<?php
+		if (getOption('osmap_showcursorpos')) {
+			?>
+			<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/L.Control.MousePosition.js"></script>
+			<?php
+		}
+		if (getOption('osmap_showminimap')) {
+			?>
+			<script src="<?php echo FULLWEBPATH . '/' . USER_PLUGIN_FOLDER; ?>/zp_openstreetmap/Control.MiniMap.min.js"></script>
+			<?php
+		}
+	}
 
-  /**
-   * $returns coordinate informations for an image
-   * Adapted from the offical Zenphoto GoogleMap plugin by Stephen Billard (sbillard) & Vincent Bourganel (vincent3569)
-   * @param $image	image object
-   */
-  function getImageGeodata($image) {
-    global $_zp_current_image;
-    $result = array();
-    if (isImageClass($image)) {
-      $exif = $image->getMetaData();
-      if ((!empty($exif['EXIFGPSLatitude'])) && (!empty($exif['EXIFGPSLongitude']))) {
-        $lat_c = explode('.', str_replace(',', '.', $exif['EXIFGPSLatitude']) . '.0');
-        $lat_f = round((float) abs($lat_c[0]) + ($lat_c[1] / pow(10, strlen($lat_c[1]))), 12);
-        if (strtoupper(@$exif['EXIFGPSLatitudeRef']{0}) == 'S') {
-          $lat_f = -$lat_f;
-        }
-        $long_c = explode('.', str_replace(',', '.', $exif['EXIFGPSLongitude']) . '.0');
-        $long_f = round((float) abs($long_c[0]) + ($long_c[1] / pow(10, strlen($long_c[1]))), 12);
-        if (strtoupper(@$exif['EXIFGPSLongitudeRef']{0}) == 'W') {
-          $long_f = -$long_f;
-        }
-        $thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getCustomImage(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='' /></a>";
-        $current = 0;
-        if($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
-          $current = 1;
-        }
+	/**
+	 * $returns coordinate informations for an image
+	 * Adapted from the offical Zenphoto GoogleMap plugin by Stephen Billard (sbillard) & Vincent Bourganel (vincent3569)
+	 * @param $image	image object
+	 */
+	function getImageGeodata($image) {
+		global $_zp_current_image;
+		$result = array();
+		if (isImageClass($image)) {
+			$exif = $image->getMetaData();
+			if ((!empty($exif['EXIFGPSLatitude'])) && (!empty($exif['EXIFGPSLongitude']))) {
+				$lat_c = explode('.', str_replace(',', '.', $exif['EXIFGPSLatitude']) . '.0');
+				$lat_f = round((float) abs($lat_c[0]) + ($lat_c[1] / pow(10, strlen($lat_c[1]))), 12);
+				if (strtoupper(@$exif['EXIFGPSLatitudeRef']{0}) == 'S') {
+					$lat_f = -$lat_f;
+				}
+				$long_c = explode('.', str_replace(',', '.', $exif['EXIFGPSLongitude']) . '.0');
+				$long_f = round((float) abs($long_c[0]) + ($long_c[1] / pow(10, strlen($long_c[1]))), 12);
+				if (strtoupper(@$exif['EXIFGPSLongitudeRef']{0}) == 'W') {
+					$long_f = -$long_f;
+				}
+				$thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getCustomImage(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='' /></a>";
+				$current = 0;
+				if ($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
+					$current = 1;
+				}
 				//in case European comma decimals sneaked in
 				$lat_f = str_replace(',', '.', $lat_f);
 				$long_f = str_replace(',', '.', $long_f);
 				$result = array(
-            'lat' => $lat_f,
-            'long' => $long_f,
-            'title' => shortenContent($image->getTitle(),50,'...').'<br />',
-            'desc' => shortenContent($image->getDesc(),100,'...'),
-            'thumb' => $thumb,
-            'current' => $current
-        );
-      }
-    }
-    return $result;
-  }
+						'lat' => $lat_f,
+						'long' => $long_f,
+						'title' => shortenContent($image->getTitle(), 50, '...') . '<br />',
+						'desc' => shortenContent($image->getDesc(), 100, '...'),
+						'thumb' => $thumb,
+						'current' => $current
+				);
+			}
+		}
+		return $result;
+	}
 
-  /**
-   * Gathers the map data for an album
-   * Adapted from the offical Zenphoto GoogleMap plugin by Stephen Billard (sbillard) & Vincent Bourganel (vincent3569)
-   * @param $album		album object
-   */
-  function getAlbumGeodata($album) {
-    $result = array();
-    $images = $album->getImages(0, 0, null, null, false);
-    foreach ($images as $an_image) {
-      $image = newImage($album, $an_image);
-      $imggeodata = $this->getImageGeodata($image);
-      if(!empty($imggeodata)) {
-        $result[] = $imggeodata;
-      }
-    }
-    return $result;
-  }
+	/**
+	 * Gathers the map data for an album
+	 * Adapted from the offical Zenphoto GoogleMap plugin by Stephen Billard (sbillard) & Vincent Bourganel (vincent3569)
+	 * @param $album		album object
+	 */
+	function getAlbumGeodata($album) {
+		$result = array();
+		$images = $album->getImages(0, 0, null, null, false);
+		foreach ($images as $an_image) {
+			$image = newImage($album, $an_image);
+			$imggeodata = $this->getImageGeodata($image);
+			if (!empty($imggeodata)) {
+				$result[] = $imggeodata;
+			}
+		}
+		return $result;
+	}
 
-  /**
-   * Extracts the geodata from an image or the images of an album 
-   * and creates the JS arrays for leaflet including title, description and thumb if set.
-   * @return array
-   */
-  function getGeoData() {
-    global $_zp_current_image, $_zp_current_album;
-    $geodata = array();
-    if (!is_null($this->geodata)) {
-      return $this->geodata;
-    }
-    switch ($this->mode) {
-      case 'single':
-        $imggeodata = $this->getImageGeodata($this->obj);
-        if(!empty($imggeodata)) {
-          $geodata = array($imggeodata);
-        }
-        break;
-      case 'single-cluster':
-      case 'cluster':
-        $albgeodata = $this->getAlbumGeodata($this->obj);
-        if(!empty($albgeodata)) {
-          $geodata = $albgeodata;
-        }
-        break;
-    }
-    if (empty($geodata)) {
-      return NULL;
-    } else {
-      return $this->geodata = $geodata;
-    }
-  }
-  
-  /**
-   * Processes the geodata returned by getGeoData() and formats it to a string 
-   * presenting a multidimensional Javascript array for use with leafletjs
-   * @return string
-   */
-  function getGeoDataJS() {
-    if (!is_null($this->geodatajs)) {
-      return $this->geodatajs;
-    }
-    $geodata = $this->getGeoData();
-    if(!empty($geodata)) {
-      $count = -1;
-      $js_geodata = '';
-      foreach ($geodata as $geo) {
-        $count++;
-        $js_geodata .= ' geodata[' . $count . '] = {
+	/**
+	 * Extracts the geodata from an image or the images of an album 
+	 * and creates the JS arrays for leaflet including title, description and thumb if set.
+	 * @return array
+	 */
+	function getGeoData() {
+		global $_zp_current_image, $_zp_current_album;
+		$geodata = array();
+		if (!is_null($this->geodata)) {
+			return $this->geodata;
+		}
+		switch ($this->mode) {
+			case 'single':
+				$imggeodata = $this->getImageGeodata($this->obj);
+				if (!empty($imggeodata)) {
+					$geodata = array($imggeodata);
+				}
+				break;
+			case 'single-cluster':
+			case 'cluster':
+				$albgeodata = $this->getAlbumGeodata($this->obj);
+				if (!empty($albgeodata)) {
+					$geodata = $albgeodata;
+				}
+				break;
+		}
+		if (empty($geodata)) {
+			return NULL;
+		} else {
+			return $this->geodata = $geodata;
+		}
+	}
+
+	/**
+	 * Processes the geodata returned by getGeoData() and formats it to a string 
+	 * presenting a multidimensional Javascript array for use with leafletjs
+	 * @return string
+	 */
+	function getGeoDataJS() {
+		if (!is_null($this->geodatajs)) {
+			return $this->geodatajs;
+		}
+		$geodata = $this->getGeoData();
+		if (!empty($geodata)) {
+			$count = -1;
+			$js_geodata = '';
+			foreach ($geodata as $geo) {
+				$count++;
+				$js_geodata .= ' geodata[' . $count . '] = {
                   lat : "' . $geo['lat'] . '",
                   long : "' . $geo['long'] . '",
-                  title : "' . js_encode(shortenContent($geo['title'],50,'...')) . '",
-                  desc : "' . js_encode(shortenContent($geo['desc'],100,'...')) . '",
+                  title : "' . js_encode(shortenContent($geo['title'], 50, '...')) . '",
+                  desc : "' . js_encode(shortenContent($geo['desc'], 100, '...')) . '",
                   thumb : "' . $geo['thumb'] . '",
                   current : "' . $geo['current'] . '"
                 };';
-      }
-      return $this->geodatajs = $js_geodata;
-    }
-  }
-  
-  /**
-   * Returns the bounds the map should fit based on the geodata of an image or images of an album
-   * @return array
-   */
-  function getFitBounds() {
-    if (!is_null($this->fitbounds)) {
-      return $this->fitbounds;
-    }
-    $geodata = $this->getGeoData();
-    if (!empty($geodata)) {
-      $geocount = count($geodata);
-      $bounds = '';
-      $count = '';
-      foreach ($geodata as $g) {
-        $count++;
-        $bounds .= '[' . $g['lat'] . ',' . $g['long'] . ']';
-        if ($count < $geocount) {
-          $bounds .= ',';
-        }
-      }
-      $this->fitbounds = $bounds;
-    }
-    return $this->fitbounds;
-  }
+			}
+			return $this->geodatajs = $js_geodata;
+		}
+	}
 
-  /**
-   * Returns the center point of the map. On an single image it is the marker of the image itself.
-   * On images from an album it is calculated from their geodata
-   * @return array
-   */
-  function getCenter() {
-    //$this->center = array(53.18, 10.38); //demotest
-    if (!is_null($this->center)) {
-      return $this->center;
-    }
-    $geodata = $this->getGeoData();
-    if(!empty($geodata)) {
-      switch ($this->mode) {
-        case 'single':
-          $this->center = array($geodata[0]['lat'], $geodata[0]['long']);
-          break;
-        case 'single-cluster':
-          foreach($geodata as $geo) {
-            if($geo['current'] == 1) {
-              $this->center = array($geo['lat'], $geo['long']);
-              break;
-            }
-          }
-          break;
-        case 'cluster':
-          //for demo tests only needs to be calculated properly later on!
-          $this->center = array($geodata[0]['lat'], $geodata[0]['long']);  
-          break;
-      }
-    }
-    return $this->center;
-  }
+	/**
+	 * Returns the bounds the map should fit based on the geodata of an image or images of an album
+	 * @return array
+	 */
+	function getFitBounds() {
+		if (!is_null($this->fitbounds)) {
+			return $this->fitbounds;
+		}
+		$geodata = $this->getGeoData();
+		if (!empty($geodata)) {
+			$geocount = count($geodata);
+			$bounds = '';
+			$count = '';
+			foreach ($geodata as $g) {
+				$count++;
+				$bounds .= '[' . $g['lat'] . ',' . $g['long'] . ']';
+				if ($count < $geocount) {
+					$bounds .= ',';
+				}
+			}
+			$this->fitbounds = $bounds;
+		}
+		return $this->fitbounds;
+	}
 
-  /**
-   * Prints the required HTML and JS for the map
-   */
-  function printMap() {
-    $class = '';
-    if (!empty($this->class)) {
-      $class = ' class="' . $this->class . '"';
-    }
-    $geodataJS = $this->getGeoDataJS();
-    if(!empty($geodataJS)) {
-      ?>
-      <div id="osm_map<?php echo $this->mapnumber; ?>"<?php echo $class; ?> style="width:<?php echo $this->width; ?>; height:<?php echo $this->height; ?>;"></div>
-      <script>
-        var geodata = new Array();
-        <?php echo $geodataJS; ?>
-        var map = L.map('osm_map<?php echo $this->mapnumber; ?>', {
-          center: [<?php echo $this->center[0]; ?>,<?php echo $this->center[1]; ?>], 
-          zoom: <?php echo $this->zoom; ?>, //option
-          zoomControl: false, // disable so we can position it below
-          minZoom: <?php echo $this->minzoom; ?>,
-          maxZoom: <?php echo $this->maxzoom; ?>,
-          layers: [<?php echo $this->maptiles; ?>] //option => prints variable name stored in tile-definitions.js
-        });
+	/**
+	 * Returns the center point of the map. On an single image it is the marker of the image itself.
+	 * On images from an album it is calculated from their geodata
+	 * @return array
+	 */
+	function getCenter() {
+		//$this->center = array(53.18, 10.38); //demotest
+		if (!is_null($this->center)) {
+			return $this->center;
+		}
+		$geodata = $this->getGeoData();
+		if (!empty($geodata)) {
+			switch ($this->mode) {
+				case 'single':
+					$this->center = array($geodata[0]['lat'], $geodata[0]['long']);
+					break;
+				case 'single-cluster':
+					foreach ($geodata as $geo) {
+						if ($geo['current'] == 1) {
+							$this->center = array($geo['lat'], $geo['long']);
+							break;
+						}
+					}
+					break;
+				case 'cluster':
+					//for demo tests only needs to be calculated properly later on!
+					$this->center = array($geodata[0]['lat'], $geodata[0]['long']);
+					break;
+			}
+		}
+		return $this->center;
+	}
 
-        <?php 
-        if($this->mode == 'cluster' && $this->fitbounds) {  
-        ?>
-        map.fitBounds([<?php echo $this->fitbounds; ?>]);
-        <?php }  
-        if($this->showminimap) {
-        	?>
-        	var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	/**
+	 * Return the map tile js definition for leaflet and its leaflet-providers plugin. 
+	 * For certain map providers it include the access credentials.
+	 * 
+	 * @return string
+	 */
+	function getTileLayerJS() {
+		$maptile = explode('.', $this->maptiles);
+		switch ($maptile[0]) {
+			case 'Mapbox':
+				return "L.tileLayer.provider('" . $this->maptiles . "', {"
+								. "id: '" . getOption('osmap_mapbox_id') . "',"
+								. "accessToken: '" . getOption('osmap_mapbox_accesstoken') . "'"
+								. "}).addTo(map);";
+			case 'HERE':
+				return "L.tileLayer.provider('" . $this->maptiles . "', {"
+								. "app_id: '" . getOption('osmap_here_appid') . "',"
+								. "app_code: '" . getOption('osmap_here_appcode') . "'"
+								. "}).addTo(map);";
+			case 'Thunderforest':
+				return "L.tileLayer.provider('" . $this->maptiles . "', {"
+								. "apikey: '" . getOption('osmap_thunderforest_apikey') . "'"
+								. "}).addTo(map);";
+			default:
+				return "L.tileLayer.provider('" . $this->maptiles . "').addTo(map);";
+		}
+	}
+
+	/**
+	 * Prints the required HTML and JS for the map
+	 */
+	function printMap() {
+		$class = '';
+		if (!empty($this->class)) {
+			$class = ' class="' . $this->class . '"';
+		}
+		$geodataJS = $this->getGeoDataJS();
+		if (!empty($geodataJS)) {
+			?>
+			<div id="osm_map<?php echo $this->mapnumber; ?>"<?php echo $class; ?> style="width:<?php echo $this->width; ?>; height:<?php echo $this->height; ?>;"></div>
+			<script>
+				var geodata = new Array();
+			<?php echo $geodataJS; ?>
+				var map = L.map('osm_map<?php echo $this->mapnumber; ?>', {
+					center: [<?php echo $this->center[0]; ?>,<?php echo $this->center[1]; ?>],
+					zoom: <?php echo $this->zoom; ?>, //option
+					zoomControl: false, // disable so we can position it below
+					minZoom: <?php echo $this->minzoom; ?>,
+					maxZoom: <?php echo $this->maxzoom; ?>
+				});
+			<?php
+			echo $this->getTileLayerJS();
+			if ($this->mode == 'cluster' && $this->fitbounds) {
+				?>
+					map.fitBounds([<?php echo $this->fitbounds; ?>]);
+			<?php
+			}
+			if ($this->showminimap) {
+				?>
+					var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 					var osm2 = new L.TileLayer(osmUrl);
-					var miniMap = new L.Control.MiniMap(osm2, { 
+					var miniMap = new L.Control.MiniMap(osm2, {
 						toggleDisplay: true,
 						zoomLevelOffset: <?php echo $this->minimap_zoom; ?>,
 						width: <?php echo $this->minimap_width; ?>,
 						height: <?php echo $this->minimap_height; ?>
 					}).addTo(map);
-				<?php }
-        if($this->showscale) { ?>
-          L.control.scale().addTo(map);
-        <?php } ?>
+			<?php }
+			if ($this->showscale) {
+				?>
+					L.control.scale().addTo(map);
+			<?php } ?>
 
-        L.control.zoom({position: '<?php echo $this->controlpos; ?>'}).addTo(map);
-        <?php if($this->showcursorpos) { ?>
-          L.control.mousePosition().addTo(map);
-        <?php } 
-        if($this->showmarkers) {
-          switch ($this->mode) {
-          case 'single':
-            ?>
-            var marker = L.marker([geodata[0]['lat'], geodata[0]['long']]).addTo(map); // from image
-            <?php
-            break;
-          case 'single-cluster':
-          case 'cluster':
-           ?>
-            var markers_cluster = new L.MarkerClusterGroup({ maxClusterRadius: <?php echo $this->clusterradius; ?> }); //radius > Option
-            $.each(geodata, function (index, value) {
-              var text = '';
-              <?php if ($this->markerpopup) { ?>
-              <?php if ($this->markerpopup_title) { ?>
-                text = value.title;
-			  <?php } ?>
-              <?php if ($this->markerpopup_thumb) { ?>
-                text += value.thumb;
-              <?php } ?>
-			  <?php if ($this->markerpopup_desc) { ?>
-                text += value.desc;
-			  <?php } ?>
-              <?php } ?>
-              if (text === '') {
-                markers_cluster.addLayer(L.marker([value.lat, value.long]));
-              } else {
-                markers_cluster.addLayer(L.marker([value.lat, value.long]).bindPopup(text));
-              }
-            });
-            map.addLayer(markers_cluster);
-          <?php
-          break;
-         }
-      }
-    }
+				L.control.zoom({position: '<?php echo $this->controlpos; ?>'}).addTo(map);
+			<?php if ($this->showcursorpos) { ?>
+					L.control.mousePosition().addTo(map);
+			<?php
+			}
+			if ($this->showmarkers) {
+				switch ($this->mode) {
+					case 'single':
+						?>
+							var marker = L.marker([geodata[0]['lat'], geodata[0]['long']]).addTo(map); // from image
+						<?php
+						break;
+					case 'single-cluster':
+					case 'cluster':
+						?>
+							var markers_cluster = new L.MarkerClusterGroup({maxClusterRadius: <?php echo $this->clusterradius; ?>}); //radius > Option
+							$.each(geodata, function (index, value) {
+								var text = '';
+						<?php if ($this->markerpopup) { ?>
+							<?php if ($this->markerpopup_title) { ?>
+										text = value.title;
+							<?php } ?>
+							<?php if ($this->markerpopup_thumb) { ?>
+										text += value.thumb;
+							<?php } ?>
+							<?php if ($this->markerpopup_desc) { ?>
+										text += value.desc;
+							<?php } ?>
+						<?php } ?>
+								if (text === '') {
+									markers_cluster.addLayer(L.marker([value.lat, value.long]));
+								} else {
+									markers_cluster.addLayer(L.marker([value.lat, value.long]).bindPopup(text));
+								}
+							});
+							map.addLayer(markers_cluster);
+						<?php
+						break;
+				}
+			}
+		}
 		?>
 		</script>
 		<?php
+	}
+
+	/**
+	 * It returns the provider chosen if it is valid or the default 'OpenStreetMap.Mapnik' tile
+	 * 
+	 * @param string $tileprovider The tile provider to validate
+	 * @return string
+	 */
+	function setMapTiles($tileprovider = null) {
+		if (array_key_exists($tileprovider, $this->tileproviders)) {
+			return $tileprovider;
+		} else {
+			return $this->tileproviders[0];
+		}
+	}
+
+	/**
+	 * Returns an array of all defined tile provider names from and for use with leaflet-providers.js and the plugin options
+	 * 
+	 * @return array
+	 */
+	static function getTitleProviders() {
+		return array(
+				'OpenStreetMap.Mapnik',
+				'OpenStreetMap.BlackAndWhite',
+				'OpenStreetMap.DE',
+				'OpenStreetMap.France',
+				'OpenStreetMap.HOT',
+				'OpenSeaMap',
+				'OpenTopoMap',
+				'Thunderforest.OpenCycleMap',
+				'Thunderforest.TransportDark',
+				'Thunderforest.SpinalMap',
+				'Thunderforest.Landscape',
+				'OpenMapSurfer.Roads',
+				'OpenMapSurfer.Grayscale',
+				'Hydda.Full',
+				'MapBox (Token required)',
+				'Stamen.Toner',
+				'Stamen.Watercolor',
+				'Stamen.Terrain',
+				'Stamen.TerrainBackground',
+				'Stamen.TopOSMRelief',
+				'Stamen.TopOSMFeatures',
+				'Esri.WorldStreetMap',
+				'Esri.DeLorme',
+				'Esri.WorldTopoMap',
+				'Esri.WorldImagery',
+				'Esri.WorldTerrain',
+				'Esri.WorldShadedRelief',
+				'Esri.WorldPhysical',
+				'Esri.OceanBasemap',
+				'Esri.NatGeoWorldMap',
+				'Esri.WorldGrayCanvas',
+				'OpenWeatherMap.Clouds',
+				'OpenWeatherMap.CloudsClassic',
+				'OpenWeatherMap.Precipitation',
+				'OpenWeatherMap.PrecipitationClassic',
+				'OpenWeatherMap.Rain',
+				'OpenWeatherMap.RainClassic',
+				'OpenWeatherMap.Pressure',
+				'OpenWeatherMap.PressureContour',
+				'OpenWeatherMap.Wind',
+				'OpenWeatherMap.Temperature',
+				'OpenWeatherMap.Snow',
+				'HERE.normalDay',
+				'HERE.normalDayCustom',
+				'HERE.normalDayGrey',
+				'HERE.normalDayMobile',
+				'HERE.normalDayGreyMobile',
+				'HERE.normalDayTransit',
+				'HERE.normalDayTransitMobile',
+				'HERE.normalNight',
+				'HERE.normalNightMobile',
+				'HERE.normalNightGrey',
+				'HERE.normalNightGreyMobile',
+				'HERE.basicMap',
+				'HERE.mapLabels',
+				'HERE.trafficFlow',
+				'HERE.carnavDayGrey',
+				'HERE.hybridDayMobile',
+				'HERE.pedestrianDay',
+				'HERE.pedestrianNight',
+				'HERE.satelliteDay',
+				'HERE.terrainDay',
+				'HERE.terrainDayMobile',
+				'FreeMapSK',
+				'MtbMap',
+				'CartoDB.Positron',
+				'CartoDB.PositronNoLabels',
+				'CartoDB.PositronOnlyLabels',
+				'CartoDB.DarkMatter',
+				'CartoDB.DarkMatterNoLabels',
+				'CartoDB.DarkMatterOnlyLabels',
+				'HikeBike.HikeBike',
+				'HikeBike.HillShading',
+				'BasemapAT.basemap',
+				'BasemapAT.grau',
+				'BasemapAT.highdpi',
+				'BasemapAT.orthofoto',
+				'NASAGIBS.ModisTerraTrueColorCR',
+				'NASAGIBS.ModisTerraLSTDay',
+				'NASAGIBS.ModisTerraSnowCover',
+				'NASAGIBS.ModisTerraAOD',
+				'NASAGIBS.ModisTerraChlorophyll',
+				'NLS',
+				'JusticeMap.income',
+				'JusticeMap.americanIndian',
+				'JusticeMap.asian',
+				'JusticeMap.black',
+				'JusticeMap.hispanic',
+				'JusticeMap.multi',
+				'JusticeMap.nonWhite',
+				'JusticeMap.white',
+				'JusticeMap.plurality'
+		);
 	}
 
 }
@@ -728,6 +872,8 @@ class zpOpenStreetMap {
 /**
  * Template function wrapper for the zpOpenStreetMap class to show a map with geodata markers 
  * for the current image or collected the images of an album.
+ * 
+ * For more flexibility use the class directly.
  * 
  * The map is not shown if there is no geodata available.
  * 
@@ -745,33 +891,33 @@ class zpOpenStreetMap {
  * @param obj $obj Image or album object to skip current image or album and also $geodata
  * @param bool $minimap True to show the minimap in the lower right corner
  */
-function printOpenStreetMap($geodata = NULL, $width = NULL, $height= NULL, $mapcenter = NULL, $zoom = NULL, $fitbounds = NULL, $class = '', $mapnumber = NULL,$obj = NULL, $minimap = false) {
-  if (!empty($class)) {
-    $class = ' class="' . $class . '"';
-  }
-  $map = new zpOpenStreetMap($geodata,$obj);
-  if (!is_null($width)) {
-    $map->width = $width;
-  }
-  if (!is_null($height)) {
-    $map->height = $height;
-  }
-  if (!is_null($mapcenter)) {
-    $map->center = $mapcenter;
-  }
-  if (!is_null($zoom)) {
-    $map->zoom = $zoom;
-  }
-  if (!is_null($fitbounds)) {
-    $map->fitbounds = $fitbounds;
-  }
-  if (!is_null($class)) {
-    $map->class = $class;
-  }
-  if (!is_null($mapnumber)) {
-    $map->mapnumber = $mapnumber;
-  }
-  if ($minimap) {
+function printOpenStreetMap($geodata = NULL, $width = NULL, $height = NULL, $mapcenter = NULL, $zoom = NULL, $fitbounds = NULL, $class = '', $mapnumber = NULL, $obj = NULL, $minimap = false) {
+	if (!empty($class)) {
+		$class = ' class="' . $class . '"';
+	}
+	$map = new zpOpenStreetMap($geodata, $obj);
+	if (!is_null($width)) {
+		$map->width = $width;
+	}
+	if (!is_null($height)) {
+		$map->height = $height;
+	}
+	if (!is_null($mapcenter)) {
+		$map->center = $mapcenter;
+	}
+	if (!is_null($zoom)) {
+		$map->zoom = $zoom;
+	}
+	if (!is_null($fitbounds)) {
+		$map->fitbounds = $fitbounds;
+	}
+	if (!is_null($class)) {
+		$map->class = $class;
+	}
+	if (!is_null($mapnumber)) {
+		$map->mapnumber = $mapnumber;
+	}
+	if ($minimap) {
 		$map->showminimap = true;
 	}
 	$map->printMap();
