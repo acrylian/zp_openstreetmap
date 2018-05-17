@@ -103,85 +103,90 @@ class zpOpenStreetMapOptions {
 						'type' => OPTION_TYPE_TEXTBOX,
 						'order' => 9,
 						'desc' => gettext("The radius when marker clusters should be used.")),
+				gettext('Show cluster coverage on hover') => array(
+						'key' => 'osmap_cluster_showcoverage_on_hover',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 10,
+						'desc' => gettext("Enable if you want to the bounds of a marker cluster on hover.")),
 				gettext('Marker popups') => array(
 						'key' => 'osmap_markerpopup',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 10,
+						'order' => 11,
 						'desc' => gettext("Enable this if you wish info popups on the map markers. Only for album context or custom geodata.")),
 				gettext('Marker popups with thumbs') => array(
 						'key' => 'osmap_markerpopup_thumb',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 11,
+						'order' => 12,
 						'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
 				gettext('Marker popups with title') => array(
 						'key' => 'osmap_markerpopup_title',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 12,
+						'order' => 13,
 						'desc' => gettext("Enable if you want to show title of images in the marker popups. Only for album context.")),
 				gettext('Marker popups with description') => array(
 						'key' => 'osmap_markerpopup_desc',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 13,
+						'order' => 14,
 						'desc' => gettext("Enable if you want to show desc of images in the marker popups. Only for album context.")),
 				gettext('Show scale') => array(
 						'key' => 'osmap_showscale',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 14,
+						'order' => 15,
 						'desc' => gettext("Enable if you want to show scale overlay (kilometers and miles).")),
 				gettext('Show cursor position') => array(
 						'key' => 'osmap_showcursorpos',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 15,
+						'order' => 16,
 						'desc' => gettext("Enable if you want to show the coordinates if moving the cursor over the map.")),
 				gettext('Show album markers') => array(
 						'key' => 'osmap_showalbummarkers',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 16,
+						'order' => 17,
 						'desc' => gettext("Enable if you want to show the map on the single image page not only the marker of the current image but all markers from the album. The current position will be highlighted.")),
 				gettext('Mini map') => array(
 						'key' => 'osmap_showminimap',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 17,
+						'order' => 18,
 						'desc' => gettext("Enable if you want to show an overview mini map in the lower right corner.")),
 				gettext('Mini map: Width') => array(
 						'key' => 'osmap_minimap_width',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 18,
+						'order' => 19,
 						'desc' => gettext("Pixel width.")),
 				gettext('Mini map: height') => array(
 						'key' => 'osmap_minimap_height',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 18,
+						'order' => 20,
 						'desc' => gettext("Pixel height")),
 				gettext('Mini map: Zoom level') => array(
 						'key' => 'osmap_minimap_zoom',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 19,
+						'order' => 21,
 						'desc' => gettext("The offset applied to the zoom in the minimap compared to the zoom of the main map. Can be positive or negative, defaults to -5.")),
 				gettext('HERE - App id') => array(
 						'key' => 'osmap_here_appid',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 20,
+						'order' => 22,
 						'desc' => ''),
 				gettext('HERE - App code') => array(
 						'key' => 'osmap_here_appcode',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 21,
+						'order' => 23,
 						'desc' => ''),
 				gettext('Mapbox - id') => array(
 						'key' => 'osmap_mapbox_id',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 22,
+						'order' => 24,
 						'desc' => ''),
 				gettext('Mapbox - Access token') => array(
 						'key' => 'osmap_mapbox_accesstoken',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 23,
+						'order' => 25,
 						'desc' => ''),
 				gettext('Thunderforest - ApiKey') => array(
 						'key' => 'osmap_thunderforest_apikey',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 24,
+						'order' => 26,
 						'desc' => ''),
 		);
 	}
@@ -429,6 +434,7 @@ class zpOpenStreetMap {
 		$this->maxzoom = getOption('osmap_maxzoom');
 		$this->maptiles = $this->setMapTiles(getOption('osmap_maptiles'));
 		$this->clusterradius = getOption('osmap_clusterradius');
+		$this->cluster_showcoverage_on_hover = getOption('osmap_cluster_showcoverage_on_hover');
 		$this->markerpopup = getOption('osmap_markerpopup');
 		$this->markerpopup_title = getOption('osmap_markerpopup_title');
 		$this->markerpopup_desc = getOption('osmap_markerpopup_desc');
@@ -747,7 +753,10 @@ class zpOpenStreetMap {
 					case 'single-cluster':
 					case 'cluster':
 						?>
-							var markers_cluster = new L.MarkerClusterGroup({maxClusterRadius: <?php echo $this->clusterradius; ?>}); //radius > Option
+							var markers_cluster = new L.MarkerClusterGroup({
+								maxClusterRadius: <?php echo $this->clusterradius; ?>,
+								showCoverageOnHover: <?php echo $this->cluster_showcoverage_on_hover; ?>
+								}); //radius > Option
 							$.each(geodata, function (index, value) {
 								var text = '';
 						<?php if ($this->markerpopup) { ?>
