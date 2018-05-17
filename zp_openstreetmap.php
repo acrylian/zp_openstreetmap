@@ -69,7 +69,7 @@ class zpOpenStreetMapOptions {
 				gettext('Map maximum zoom') => array('key' => 'osmap_maxzoom', 'type' => OPTION_TYPE_TEXTBOX,
 						'desc' => gettext("Default maximum zoom level possible.")),
 				gettext('Controls position') => array(
-						'key' => 'osmap_maptiles',
+						'key' => 'osmap_controlpos',
 						'type' => OPTION_TYPE_SELECTOR,
 						'order' => 4,
 						'selections' => array(
