@@ -673,7 +673,7 @@ class zpOpenStreetMap {
 	function getTileLayerJS() {
 		$maptile = explode('.', $this->maptiles);
 		switch ($maptile[0]) {
-			case 'Mapbox':
+			case 'MapBox':
 				return "L.tileLayer.provider('" . $this->maptiles . "', {"
 								. "id: '" . getOption('osmap_mapbox_id') . "',"
 								. "accessToken: '" . getOption('osmap_mapbox_accesstoken') . "'"
@@ -822,7 +822,7 @@ class zpOpenStreetMap {
 				'OpenMapSurfer.Roads',
 				'OpenMapSurfer.Grayscale',
 				'Hydda.Full',
-				'MapBox (Token required)',
+				'MapBox',
 				'Stamen.Toner',
 				'Stamen.Watercolor',
 				'Stamen.Terrain',
