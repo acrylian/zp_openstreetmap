@@ -57,21 +57,40 @@ class zpOpenStreetMapOptions {
 				gettext('Map dimensions—width') => array(
 						'key' => 'osmap_width',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 1,
 						'desc' => gettext("Width of them map including the unit name e.g 100% (default for responsive map), 100x or 100em.")),
 				gettext('Map dimensions—height') => array(
 						'key' => 'osmap_height',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 2,
 						'desc' => gettext("Height of them map including the unit name e.g 100% (default for responsive map), 100x or 100em.")),
-				gettext('Map zoom') => array('key' => 'osmap_zoom', 'type' => OPTION_TYPE_TEXTBOX,
+				gettext('Map zoom') => array(
+						'key' => 'osmap_zoom',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 3,
 						'desc' => gettext("Default zoom level.")),
-				gettext('Map minimum zoom') => array('key' => 'osmap_minzoom', 'type' => OPTION_TYPE_TEXTBOX,
+				gettext('Map minimum zoom') => array(
+						'key' => 'osmap_minzoom',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 5,
 						'desc' => gettext("Default minimum zoom level possible.")),
-				gettext('Map maximum zoom') => array('key' => 'osmap_maxzoom', 'type' => OPTION_TYPE_TEXTBOX,
+				gettext('Map maximum zoom') => array(
+						'key' => 'osmap_maxzoom',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 6,
 						'desc' => gettext("Default maximum zoom level possible.")),
+				gettext('Map tiles') => array(
+						'key' => 'osmap_maptiles',
+						'type' => OPTION_TYPE_SELECTOR,
+						'order' => 7,
+						'selections' => $providers,
+						'desc' => gettext('The map tile provider to use. Only free providers are included.'
+										. ' HERE, Mapbox and Thunderforest map tiles require access credentials and Esri requires registration.'
+										. ' More info on <a href="https://github.com/leaflet-extras/leaflet-providers">leaflet-providers</a>')),
 				gettext('Controls position') => array(
 						'key' => 'osmap_controlpos',
 						'type' => OPTION_TYPE_SELECTOR,
-						'order' => 4,
+						'order' => 8,
 						'selections' => array(
 								gettext('Top left') => 'topleft',
 								gettext('Top right') => 'topright',
@@ -79,81 +98,90 @@ class zpOpenStreetMapOptions {
 								gettext('Bottom right') => 'bottomright'
 						),
 						'desc' => gettext('Position of the map controls')),
-				gettext('Map tiles') => array(
-						'key' => 'osmap_maptiles',
-						'type' => OPTION_TYPE_SELECTOR,
-						'order' => 4,
-						'selections' => $providers,
-						'desc' => gettext('The map tile provider to use. Only free providers are included.'
-										. ' HERE, Mapbox and Thunderforest map tiles require access credentials and Esri requires registration.'
-										. ' More info on <a href="https://github.com/leaflet-extras/leaflet-providers">leaflet-providers</a>')),
 				gettext('Cluster radius') => array(
 						'key' => 'osmap_clusterradius',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 9,
 						'desc' => gettext("The radius when marker clusters should be used.")),
 				gettext('Marker popups') => array(
 						'key' => 'osmap_markerpopup',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 10,
 						'desc' => gettext("Enable this if you wish info popups on the map markers. Only for album context or custom geodata.")),
 				gettext('Marker popups with thumbs') => array(
 						'key' => 'osmap_markerpopup_thumb',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 11,
 						'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
 				gettext('Marker popups with title') => array(
 						'key' => 'osmap_markerpopup_title',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 12,
 						'desc' => gettext("Enable if you want to show title of images in the marker popups. Only for album context.")),
 				gettext('Marker popups with description') => array(
 						'key' => 'osmap_markerpopup_desc',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 13,
 						'desc' => gettext("Enable if you want to show desc of images in the marker popups. Only for album context.")),
 				gettext('Show scale') => array(
 						'key' => 'osmap_showscale',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 14,
 						'desc' => gettext("Enable if you want to show scale overlay (kilometers and miles).")),
 				gettext('Show cursor position') => array(
 						'key' => 'osmap_showcursorpos',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 15,
 						'desc' => gettext("Enable if you want to show the coordinates if moving the cursor over the map.")),
 				gettext('Show album markers') => array(
 						'key' => 'osmap_showalbummarkers',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 16,
 						'desc' => gettext("Enable if you want to show the map on the single image page not only the marker of the current image but all markers from the album. The current position will be highlighted.")),
 				gettext('Mini map') => array(
 						'key' => 'osmap_showminimap',
 						'type' => OPTION_TYPE_CHECKBOX,
+						'order' => 17,
 						'desc' => gettext("Enable if you want to show an overview mini map in the lower right corner.")),
 				gettext('Mini map: Width') => array(
 						'key' => 'osmap_minimap_width',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 18,
 						'desc' => gettext("Pixel width.")),
 				gettext('Mini map: height') => array(
 						'key' => 'osmap_minimap_height',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 18,
 						'desc' => gettext("Pixel height")),
 				gettext('Mini map: Zoom level') => array(
 						'key' => 'osmap_minimap_zoom',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 19,
 						'desc' => gettext("The offset applied to the zoom in the minimap compared to the zoom of the main map. Can be positive or negative, defaults to -5.")),
-				gettext('Thunderforest - ApiKey') => array(
-						'key' => 'osmap_thunderforest_apikey',
-						'type' => OPTION_TYPE_TEXTBOX,
-						'desc' => ''),
 				gettext('HERE - App id') => array(
 						'key' => 'osmap_here_appid',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 20,
 						'desc' => ''),
 				gettext('HERE - App code') => array(
 						'key' => 'osmap_here_appcode',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 21,
 						'desc' => ''),
 				gettext('Mapbox - id') => array(
 						'key' => 'osmap_mapbox_id',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 22,
 						'desc' => ''),
 				gettext('Mapbox - Access token') => array(
 						'key' => 'osmap_mapbox_accesstoken',
 						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 23,
+						'desc' => ''),
+				gettext('Thunderforest - ApiKey') => array(
+						'key' => 'osmap_thunderforest_apikey',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'order' => 24,
 						'desc' => ''),
 		);
 	}
@@ -685,7 +713,7 @@ class zpOpenStreetMap {
 			if ($this->mode == 'cluster' && $this->fitbounds) {
 				?>
 					map.fitBounds([<?php echo $this->fitbounds; ?>]);
-			<?php
+				<?php
 			}
 			if ($this->showminimap) {
 				?>
@@ -697,7 +725,8 @@ class zpOpenStreetMap {
 						width: <?php echo $this->minimap_width; ?>,
 						height: <?php echo $this->minimap_height; ?>
 					}).addTo(map);
-			<?php }
+			<?php
+			}
 			if ($this->showscale) {
 				?>
 					L.control.scale().addTo(map);
@@ -706,7 +735,7 @@ class zpOpenStreetMap {
 				L.control.zoom({position: '<?php echo $this->controlpos; ?>'}).addTo(map);
 			<?php if ($this->showcursorpos) { ?>
 					L.control.mousePosition().addTo(map);
-			<?php
+				<?php
 			}
 			if ($this->showmarkers) {
 				switch ($this->mode) {
@@ -756,7 +785,7 @@ class zpOpenStreetMap {
 	 * @return string
 	 */
 	function setMapTiles($tileprovider = null) {
-		if (array_key_exists($tileprovider, $this->tileproviders)) {
+		if (in_array($tileprovider, $this->tileproviders)) {
 			return $tileprovider;
 		} else {
 			return $this->tileproviders[0];
