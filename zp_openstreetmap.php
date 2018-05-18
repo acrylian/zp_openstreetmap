@@ -173,11 +173,6 @@ class zpOpenStreetMapOptions {
 						'type' => OPTION_TYPE_TEXTBOX,
 						'order' => 23,
 						'desc' => ''),
-				gettext('Mapbox - id') => array(
-						'key' => 'osmap_mapbox_id',
-						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 24,
-						'desc' => ''),
 				gettext('Mapbox - Access token') => array(
 						'key' => 'osmap_mapbox_accesstoken',
 						'type' => OPTION_TYPE_TEXTBOX,
@@ -674,8 +669,8 @@ class zpOpenStreetMap {
 		$maptile = explode('.', $this->maptiles);
 		switch ($maptile[0]) {
 			case 'MapBox':
-				return "L.tileLayer.provider('" . $this->maptiles . "', {"
-								. "id: '" . getOption('osmap_mapbox_id') . "',"
+				return "L.tileLayer.provider('" . $maptile[0] . "', {"
+								. "id: '" . strtolower($this->maptiles) . "',"
 								. "accessToken: '" . getOption('osmap_mapbox_accesstoken') . "'"
 								. "}).addTo(map);";
 			case 'HERE':
@@ -822,7 +817,21 @@ class zpOpenStreetMap {
 				'OpenMapSurfer.Roads',
 				'OpenMapSurfer.Grayscale',
 				'Hydda.Full',
-				'MapBox',
+				'MapBox.streets',
+				'MapBox.streets',
+				'MapBox.light',
+				'MapBox.dark',
+				'MapBox.satellite',
+				'MapBox.streets-satellite',
+				'MapBox.wheatpaste',
+				'MapBox.streets-basic',
+				'MapBox.comic',
+				'MapBox.outdoors',
+				'MapBox.run-bike-hike',
+				'MapBox.pencil',
+				'MapBox.pirates',
+				'MapBox.emerald',
+				'MapBox.high-contrast',
 				'Stamen.Toner',
 				'Stamen.Watercolor',
 				'Stamen.Terrain',
