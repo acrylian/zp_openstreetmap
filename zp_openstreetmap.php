@@ -669,6 +669,7 @@ class zpOpenStreetMap {
 		$maptile = explode('.', $this->maptiles);
 		switch ($maptile[0]) {
 			case 'MapBox':
+			    // should be Mapbox but follow leaflet-providers behavior
 				return "L.tileLayer.provider('" . $maptile[0] . "', {"
 								. "id: '" . strtolower($this->maptiles) . "',"
 								. "accessToken: '" . getOption('osmap_mapbox_accesstoken') . "'"
@@ -817,6 +818,7 @@ class zpOpenStreetMap {
 				'OpenMapSurfer.Roads',
 				'OpenMapSurfer.Grayscale',
 				'Hydda.Full',
+				// should be mapbox.streets,... but follow leaflet-providers behavior
 				'MapBox.streets',
 				'MapBox.streets',
 				'MapBox.light',
