@@ -820,7 +820,6 @@ class zpOpenStreetMap {
 				'Hydda.Full',
 				// should be mapbox.streets,... but follow leaflet-providers behavior
 				'MapBox.streets',
-				'MapBox.streets',
 				'MapBox.light',
 				'MapBox.dark',
 				'MapBox.satellite',
