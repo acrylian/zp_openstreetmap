@@ -45,6 +45,7 @@ class zpOpenStreetMapOptions {
 		setOptionDefault('osmap_minimap_width', 100);
 		setOptionDefault('osmap_minimap_height', 100);
 		setOptionDefault('osmap_minimap_zoom', -5);
+		setOptionDefault('osmap_cluster_showcoverage_on_hover', 0);
 		if (class_exists('cacheManager')) {
 			cacheManager::deleteThemeCacheSizes('zp_openstreetmap');
 			cacheManager::addThemeCacheSize('zp_openstreetmap', 150, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, NULL, NULL);
