@@ -10,7 +10,7 @@
  * - Leaflet-MiniMap plugin: https://github.com/Norkart/Leaflet-MiniMap
  * - leaflet-providers plugin: https://github.com/leaflet-extras/leaflet-providers
  * 
- * @author Malte Müller (acrylian) <info@maltem.de>
+ * @author Malte Müller (acrylian), Vincent Bourganel (vincent3569)
  * @copyright 2018 Malte Müller (acrylian)
  * @licence GPL v3 or later
  * @package plugins
@@ -18,7 +18,7 @@
  */
 $plugin_is_filter = 5 | THEME_PLUGIN;
 $plugin_description = gettext("A Zenphoto plugin for displaying OpenStreetMap based maps using LeafletJS for images or images from albums with embeded geodata.");
-$plugin_author = "Malte Müller (acrylian)";
+$plugin_author = "Malte Müller (acrylian), Vincent Bourganel (vincent3569)";
 $plugin_version = '2.0';
 $option_interface = 'zpOpenStreetMapOptions';
 
