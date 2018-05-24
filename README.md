@@ -1,3 +1,5 @@
+**NOTE: This plugin will be part of the next Zenphoto release, development has been moved there already and this repository will be abandoned**
+
 zp_openstreetmap
 ==============
 
